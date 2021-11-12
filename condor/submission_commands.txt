@@ -1,0 +1,7 @@
+#2016
+python run_selection.py -c selection_configs/2016/selection_mc_2016.json -y 2016 -d -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 10 -q longlunch
+python run_selection.py -c selection_configs/2016/selection_mc_2016_TTHT.json -y 2016 -d -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 5 -q workday
+python run_selection.py -c selection_configs/2016/selection_data_2016.json -y 2016 -d -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 100 -q longlunch
+
+
+

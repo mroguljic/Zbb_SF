@@ -1,0 +1,11 @@
+
+universe              = vanilla
+executable            = templates_hadronic/run_script.sh
+output                = templates_hadronic/output_$(Process).out
+error                 = templates_hadronic/output_$(Process).err
+log                   = templates_hadronic/output_$(Process).log
++JobFlavour           = "longlunch"
+Arguments = "$(args)"
+use_x509userproxy = true
+Queue args from templates_hadronic/args.txt
+queue
