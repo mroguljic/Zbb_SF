@@ -10,8 +10,6 @@ variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp
 
     
 for d in directories:
-    if("TTbar" in d):
-        continue
     for variation in variations:
         if(variation!="nom" and ("JetHT" in d or "QCD" in d)):
             continue

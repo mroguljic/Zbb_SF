@@ -71,6 +71,12 @@
     "xsec": 377.96,
     "color": 4
   },
+  "TTbarSemi": {
+    "maxEvents": -1,
+    "dataset":"/eos/cms/store/group/phys_b2g/XToHYTo4B/UL_skims/2016/TTbarSemi",
+    "xsec": 377.96,
+    "color": 4
+  },
   "QCD500": {
     "maxEvents": -1,
     "dataset":"/eos/cms/store/group/phys_b2g/XToHYTo4B/UL_skims/2016/QCDHT500",

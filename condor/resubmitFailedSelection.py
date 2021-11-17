@@ -30,11 +30,10 @@ samples         = os.listdir(targetDir)
 verbose         = False
 submit_cmds     = []
 interactive_cmds= []
-interactiveFlag = False #Whether to print commands to run interactively (true) or condor commands to rsb (false)
+interactiveFlag = True #Whether to print commands to run interactively (true) or condor commands to rsb (false)
 variations   = ["nom","jerUp","jerDown","jesUp","jesDown","jmsUp","jmsDown","jmrUp","jmrDown"]
 
 for sample in samples:
-    #Remove this
     print(sample)
 
     toResubmit  = ""
@@ -56,8 +55,8 @@ for sample in samples:
             if(var!="nom" and ("QCD" in sample or "JetHT" in sample)):
                 continue
             tempFileName = outputFile.replace(".root","_{0}.root".format(var))
-            if(checkFile(tempFileName) and file_age(tempFileName)<2.):
-            #If files exists and younger than 2 days
+            if(checkFile(tempFileName) and file_age(tempFileName)<10.):
+            #If files exists and younger than N days
                 if(verbose):
                     print("Found ", tempFileName)
                 continue
