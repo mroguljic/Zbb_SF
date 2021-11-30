@@ -50,6 +50,7 @@ CompileCpp("TIMBER/Framework/TTstitching.cc")
 CompileCpp("TIMBER/Framework/SemileptonicFunctions.cc") 
 CompileCpp("TIMBER/Framework/semiResolvedFunctions.cc") 
 CompileCpp("TIMBER/Framework/src/JMSUncShifter.cc") 
+CompileCpp("TIMBER/Framework/Zbb_Functions.cc") 
 CompileCpp("JMSUncShifter jmsShifter = JMSUncShifter();") 
 CompileCpp("TIMBER/Framework/src/JMRUncSmearer.cc") 
 CompileCpp("JMRUncSmearer jmrSmearer = JMRUncSmearer();") 
@@ -275,10 +276,12 @@ if(varName=="nom"):
     a.SetActiveNode(checkpoint)
 #-----Trigger study part end------
 
-#Categorize TT (leading) jet
-if("TTbar" in options.process):
-    a.Define("jetCat","classifyProbeJet(0, FatJet_phi, FatJet_eta, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother)")
-
+#Categorize ZJets
+if("ZJets" in options.process):
+    a.Define("jetCat","classifyZJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
+#Categorize WJets 
+if("WJets" in options.process):
+    a.Define("jetCat","classifyWJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
 
 snapshotColumns = ["pnet0","FatJet_pt0","mSD","PV_npvsGood","nFatJet"]
 
@@ -302,7 +305,9 @@ if not isData:
         snapshotColumns.append("MTT")
         snapshotColumns.append("topPt")
         snapshotColumns.append("antitopPt")
+    if("ZJets" in options.process or "WJets" in options.process):
         snapshotColumns.append("jetCat")
+
 if(year=="2018"):
     snapshotColumns.append("HEMweight")
 

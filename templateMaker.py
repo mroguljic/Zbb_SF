@@ -15,6 +15,20 @@ def getNweighted(analyzer,isData):
         nWeighted = analyzer.DataFrame.Count().GetValue()
     return nWeighted
 
+def separateVHistos(analyzer,process,region):
+    cats = {"light":0,"c":1,"b":2}
+
+    separatedHistos = []
+    beforeNode = analyzer.GetActiveNode()
+    for cat in cats:
+        analyzer.SetActiveNode(beforeNode)
+        analyzer.Cut("{0}_{1}_{2}_cut".format(process,cat,region),"jetCat=={0}".format(cats[cat]))
+        hist = a.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
+
+        separatedHistos.append(hist)
+    analyzer.SetActiveNode(beforeNode)
+    return separatedHistos
+
 parser = OptionParser()
 
 parser.add_option('-i', '--input', metavar='IFILE', type='string', action='store',
@@ -119,6 +133,9 @@ for region,cut in regionDefs:
     h2d = a.DataFrame.Histo2D(('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
     histos.append(h2d)
     regionYields[region] = getNweighted(a,isData)
+    if("ZJets" in options.process or "WJets" in options.process):
+        categorizedHistos = separateVHistos(a,options.process,region)
+        histos.extend(categorizedHistos)
 
 #include histos from evt sel in the template file for nominal template
 if(options.variation=="nom"):
