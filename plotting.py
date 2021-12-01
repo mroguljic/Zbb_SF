@@ -352,7 +352,7 @@ def printYields(data_proj,hMC,procs):
 
 
 def plotPostfit():
-    postfitShapesFile  = "/afs/cern.ch/work/m/mrogulji/UL_X_YH/X_YH_4b/CMSSW_10_6_14/src/2DAlphabet/Zbb_SF16_22/postfitshapes_s.root"
+    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_SF_22_16/postfitshapes_s.root"
     regionsToPlot      = ["T","F"]
     labelsMC           = ["Multijet",r"t$\bar{t}$","WJets","ZJets"]
     colorsMC           = ["khaki","lightcoral","palegreen","blueviolet"]
@@ -442,7 +442,7 @@ def plotPostfit():
 
 if __name__ == '__main__':
     #Postfit
-    plotPostfit()
+    # plotPostfit()
 
     #Control vars
     # parser = OptionParser()
@@ -491,9 +491,17 @@ if __name__ == '__main__':
     #     # plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
 
 
-    #     f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
-    #     hTotal = f.Get("data_obs_pT0noTriggers_nom")
-    #     hPass  = f.Get("data_obs_pT0triggersAll_nom")
+        # f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
+        # hTotal = f.Get("data_obs_pT0noTriggers_nom")
+        # hPass  = f.Get("data_obs_pT0triggersAll_nom")
+        # eff = r.TEfficiency(hPass,hTotal)
+        # eff.SetName("trig_eff")
+        # print(eff.GetName())
+        # g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
+        # g.cd()
+        # eff.Write()
+        # g.Close()
+
     #     plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
 
 

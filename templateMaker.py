@@ -84,13 +84,30 @@ else:
     isData=False
 
 if not isData:
-    # triggerCorr = Correction('triggerCorrection',"TIMBER/Framework/src/EffLoader.cc",constructor=['"../TIMBER/TIMBER/data/TriggerEffs/TriggerEffs.root"','"triggEff_{0}"'.format(year)],corrtype='weight')
-    # a.AddCorrection(triggerCorr, evalArgs={'xval':'MJJ','yval':0,'zval':0})
+    trigFile   = "data/trig_eff_2016.root"
+    a.Define("pt_for_trig","TMath::Min(Double_t(genVpt),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)
+    triggerCorr = Correction('triggerCorrection',"TIMBER/Framework/src/EffLoader.cc",constructor=['"{0}"'.format(trigFile),'"trig_eff"'],corrtype='weight')
+    a.AddCorrection(triggerCorr, evalArgs={'xval':'pt_for_trig','yval':0,'zval':0})
     puCorr      = Correction('puReweighting',"TIMBER/Framework/src/puWeight.cc",constructor=['"../TIMBER/TIMBER/data/pileup/PUweights_{0}.root"'.format(year)],corrtype='weight')
     a.AddCorrection(puCorr, evalArgs={'puTrue':'Pileup_nTrueInt'})
     if("TTbar" in options.process):
         ptrwtCorr = Correction('topPtReweighting',"TIMBER/Framework/src/TopPt_reweighting.cc",corrtype='weight')
         a.AddCorrection(ptrwtCorr, evalArgs={'genTPt':'topPt','genTbarPt':'antitopPt'})
+    if("WJets" in options.process):
+        qcdName = "W_NLO_QCD_2016"
+        ewkName = "EWK_W"
+    if("ZJets" in options.process):
+        qcdName = "Z_NLO_QCD_2016"
+        ewkName = "EWK_Z"
+    if("WJets" in options.process or "ZJets" in options.process):
+        NLOfile = "data/NLO_corrections.root"
+        a.Define("genVpt_rescaled","TMath::Max(250.,TMath::Min(Double_t(genVpt),1000.))")#Weights applied in 250-1000 GeV gen V pt range
+        NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
+        NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
+        a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+
+
 
 if isData:
     a.Define("genWeight","1")

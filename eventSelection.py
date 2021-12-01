@@ -50,7 +50,7 @@ CompileCpp("TIMBER/Framework/TTstitching.cc")
 CompileCpp("TIMBER/Framework/SemileptonicFunctions.cc") 
 CompileCpp("TIMBER/Framework/semiResolvedFunctions.cc") 
 CompileCpp("TIMBER/Framework/src/JMSUncShifter.cc") 
-CompileCpp("TIMBER/Framework/Zbb_Functions.cc") 
+CompileCpp("TIMBER/Framework/ZbbSF/Zbb_Functions.cc") 
 CompileCpp("JMSUncShifter jmsShifter = JMSUncShifter();") 
 CompileCpp("TIMBER/Framework/src/JMRUncSmearer.cc") 
 CompileCpp("JMRUncSmearer jmrSmearer = JMRUncSmearer();") 
@@ -58,7 +58,8 @@ CompileCpp("JMRUncSmearer jmrSmearer = JMRUncSmearer();")
 
 varName = options.variation
 if(varName=="nom"):
-    ptVar  = "FatJet_pt_nom"
+    #ptVar  = "FatJet_pt_nom"
+    ptVar  = "FatJet_pt"
 elif("jm" in varName):#jmr,jms
     ptVar  = "FatJet_pt_nom"
 elif("je" in varName):#jes,jer
@@ -147,6 +148,13 @@ elif(year=="2018"):
    triggerList=["HLT_PFHT1050","HLT_AK8PFJet400_TrimMass30","HLT_AK8PFJet420_TrimMass30","HLT_AK8PFHT800_TrimMass50",
 "HLT_PFJet500","HLT_AK8PFJet500"]
 
+
+if("ZJets" in options.process or "WJets" in options.process):
+    a.Define("genVpt","genVpt(nGenPart,GenPart_pdgId,GenPart_pt,GenPart_statusFlags)")
+    hvPt = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_gen_V_pT'.format(options.process),';Gen V pT [GeV]; Events/10 GeV;',200,0,2000),"genVpt","genWeight")
+    histos.append(hvPt)
+
+
 a.Cut("MET_Filters",MetFiltersString)
 beforeTrigCheckpoint = a.GetActiveNode()
 if(isData):
@@ -223,6 +231,9 @@ npT = getNweighted(a,isData)
 
 a.Cut("mSDCut","mSD>40")
 nmSD = getNweighted(a,isData)
+
+hvPt_sel = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_gen_V_pT'.format(options.process),';Gen V pT [GeV]; Events/10 GeV;',200,0,2000),"genVpt","genWeight")
+histos.append(hvPt_sel)
 
 
 a.Cut("LeptonVeto","nMu==0 && nEle==0")
@@ -307,6 +318,7 @@ if not isData:
         snapshotColumns.append("antitopPt")
     if("ZJets" in options.process or "WJets" in options.process):
         snapshotColumns.append("jetCat")
+        snapshotColumns.append("genVpt")
 
 if(year=="2018"):
     snapshotColumns.append("HEMweight")
