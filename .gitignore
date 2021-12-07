@@ -1,0 +1,13 @@
+condor/templates/*out
+condor/templates/*err
+condor/templates/*log
+CMSSW_10_6_14/
+condor/__pycache__/
+condor/mrogulji.cc
+condor/selectionJobs/
+misc/oldPlots/
+results/
+test*txt
+test*root
+testing.py
+
