@@ -438,6 +438,59 @@ def plotPostfit():
             #     rebinnedSignal = []
             # plotShapes(data_proj,qcd_proj,ttbar_proj,totalBkg_proj,uncBand_proj,rebinnedSignal,labelsSignal,["darkred","blue","green"],"$M_{JJ}$ [GeV]","hadronicPostfitPlots/{0}_MJJ.png".format(region),xRange=[800.,4000.],yRange=[0.,ymax[region]])
 
+def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="35.9",proj=""):
+    histos = []
+    labels  = []
+    edges   = []
+    colors  = []
+    histosData = []#we're assuming only one data_obs dataset
+    edgesData  = []#it's still kept in array (with one element) to be similar to other processes
+    labelsData = []
+    data = sorted(data.items(), key=lambda x: x[1]["order"])#VERY HANDY, reads samples in order
+    for sample, sample_cfg in data:
+        if not(("ZJets" in samples) or ("WJets" in sample)):
+            continue
+
+        tempFile = r.TFile.Open(sample_cfg["file"])
+        if(proj=="X"):
+            h = tempFile.Get("{0}_{1}".format(sample,var)).ProjectionX()
+        elif(proj=="Y"):
+            h = tempFile.Get("{0}_{1}".format(sample,var)).ProjectionY()
+        else:
+            h = tempFile.Get("{0}_{1}".format(sample,var))
+        h.RebinX(rebinX)
+        hist, edges = hist2array(h,return_edges=True)
+        histos.append(hist)
+        edges.append(edges[0])
+        labels.append(sample_cfg["label"])
+        colors.append(sample_cfg["color"])
+
+    plt.style.use([hep.style.CMS])
+    f, ax = plt.subplots()
+
+    hep.histplot(histos,edges[0],stack=True,ax=ax,label=labels,linewidth=1,histtype="fill",facecolor=colors,edgecolor='black')
+    if(log):
+        ax.set_yscale("log")
+    ax.legend()
+    ax.set_ylabel(yTitle)
+    ax.set_xlabel(xTitle)
+    plt.xlabel(xTitle, horizontalalignment='right', x=1.0)
+    plt.ylabel(yTitle,horizontalalignment='right', y=1.0)
+    if(yRange):
+        ax.set_ylim(yRange)
+    if(xRange):
+        ax.set_xlim(xRange)
+    lumiText = luminosity + " $fb^{-1}\ (13 TeV)$"
+    hep.cms.lumitext(text=lumiText, ax=ax, fontname=None, fontsize=None)
+    hep.cms.text("WiP",loc=0)
+    plt.tight_layout()
+    plt.legend(loc="best",ncol=2)#loc = 'best'
+
+    print("Saving {0}".format(outFile))
+
+    plt.savefig(outFile)
+
+    plt.clf()
 
 
 if __name__ == '__main__':
@@ -445,69 +498,70 @@ if __name__ == '__main__':
     # plotPostfit()
 
     #Control vars
-    # parser = OptionParser()
-    # parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
-    #             default   =   '',
-    #             dest      =   'json',
-    #             help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
-    #         default   =   '',
-    #         dest      =   'year',
-    #         help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # (options, args) = parser.parse_args()
-    # odir = "results/plots/{0}/".format(options.year)
+    parser = OptionParser()
+    parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
+                default   =   '',
+                dest      =   'json',
+                help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
+            default   =   '',
+            dest      =   'year',
+            help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    (options, args) = parser.parse_args()
+    odir = "results/plots/{0}/".format(options.year)
 
-    # year = options.year
-    # if(year=="2016"):
-    #     luminosity="36.3"
-    # elif(year=="2017"):
-    #     luminosity="41.5"
-    # elif(year=="2018"):
-    #     luminosity="59.8"
-    # elif(year=="RunII"):
-    #     luminosity="138"
-    # else:
-    #     print("Year not specified")
-    #     luminosity="0"
+    year = options.year
+    if(year=="2016"):
+        luminosity="36.3"
+    elif(year=="2017"):
+        luminosity="41.5"
+    elif(year=="2018"):
+        luminosity="59.8"
+    elif(year=="RunII"):
+        luminosity="138"
+    else:
+        print("Year not specified")
+        luminosity="0"
 
-    # with open(options.json) as json_file:
-    #     data = json.load(json_file)
+    with open(options.json) as json_file:
+        data = json.load(json_file)
 
-    #     # plotVarStack(data,"m_pT_T_nom","plots/2016/T_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
-    #     # plotVarStack(data,"m_pT_L_nom","plots/2016/L_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
-    #     # plotVarStack(data,"m_pT_F_nom","plots/2016/F_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
+        plotVarStack(data,"m_pT_T_nom","plots/2016/T_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
+        plotVarStack(data,"m_pT_L_nom","plots/2016/L_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
+        plotVarStack(data,"m_pT_F_nom","plots/2016/F_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
 
-    #     # plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-    #     # plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-    #     # plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
 
-    #     # plotVarStack(data,"m_pT_T_nom","plots/2016/T_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-    #     # plotVarStack(data,"m_pT_L_nom","plots/2016/L_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-    #     # plotVarStack(data,"m_pT_F_nom","plots/2016/F_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-
-
-    #     # plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-    #     # plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-    #     # plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_T_nom","plots/2016/T_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
+        plotVarStack(data,"m_pT_L_nom","plots/2016/L_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
+        plotVarStack(data,"m_pT_F_nom","plots/2016/F_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
 
 
-        # f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
-        # hTotal = f.Get("data_obs_pT0noTriggers_nom")
-        # hPass  = f.Get("data_obs_pT0triggersAll_nom")
-        # eff = r.TEfficiency(hPass,hTotal)
-        # eff.SetName("trig_eff")
-        # print(eff.GetName())
-        # g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
-        # g.cd()
-        # eff.Write()
-        # g.Close()
-
-    #     plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
+        plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+        plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
 
 
+        f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
+        hTotal = f.Get("data_obs_pT0noTriggers_nom")
+        hPass  = f.Get("data_obs_pT0triggersAll_nom")
+        eff = r.TEfficiency(hPass,hTotal)
+        eff.SetName("trig_eff")
+        print(eff.GetName())
+        g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
+        g.cd()
+        eff.Write()
+        g.Close()
+
+        plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
 
 
 
+    plotVJets(data,"VpT_F_nom","plots/2016/F_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
+    plotVJets(data,"VpT_L_nom","plots/2016/L_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
+    plotVJets(data,"VpT_T_nom","plots/2016/T_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
 
 
 

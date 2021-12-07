@@ -16,16 +16,22 @@ def getNweighted(analyzer,isData):
     return nWeighted
 
 def separateVHistos(analyzer,process,region):
-    cats = {"light":0,"c":1,"b":2}
+    cats = {
+    "light" : "jetCat==0 && Vmatched==1",
+    "c"     : "jetCat==1 && Vmatched==1",
+    "b"     : "jetCat==2 && Vmatched==1",
+    "unm"   : "Vmatched==0"}
 
     separatedHistos = []
     beforeNode = analyzer.GetActiveNode()
     for cat in cats:
         analyzer.SetActiveNode(beforeNode)
-        analyzer.Cut("{0}_{1}_{2}_cut".format(process,cat,region),"jetCat=={0}".format(cats[cat]))
+        analyzer.Cut("{0}_{1}_{2}_cut".format(process,cat,region),"{0}".format(cats[cat]))
         hist = a.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
+        hVpt = a.DataFrame.Histo1D(('{0}_{1}_VpT_{2}'.format(process,cat,region),';V pT [GeV];;',200,0,2000),"genVpt","evtWeight")
 
         separatedHistos.append(hist)
+        separatedHistos.append(hVpt)
     analyzer.SetActiveNode(beforeNode)
     return separatedHistos
 
@@ -85,7 +91,7 @@ else:
 
 if not isData:
     trigFile   = "data/trig_eff_2016.root"
-    a.Define("pt_for_trig","TMath::Min(Double_t(genVpt),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)
+    a.Define("pt_for_trig","TMath::Min(Double_t(FatJet_pt0),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)
     triggerCorr = Correction('triggerCorrection',"TIMBER/Framework/src/EffLoader.cc",constructor=['"{0}"'.format(trigFile),'"trig_eff"'],corrtype='weight')
     a.AddCorrection(triggerCorr, evalArgs={'xval':'pt_for_trig','yval':0,'zval':0})
     puCorr      = Correction('puReweighting',"TIMBER/Framework/src/puWeight.cc",constructor=['"../TIMBER/TIMBER/data/pileup/PUweights_{0}.root"'.format(year)],corrtype='weight')
@@ -101,11 +107,11 @@ if not isData:
         ewkName = "EWK_Z"
     if("WJets" in options.process or "ZJets" in options.process):
         NLOfile = "data/NLO_corrections.root"
-        a.Define("genVpt_rescaled","TMath::Max(250.,TMath::Min(Double_t(genVpt),1000.))")#Weights applied in 250-1000 GeV gen V pt range
-        NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
-        NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
-        a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
-        a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        #a.Define("genVpt_rescaled","TMath::Max(250.,TMath::Min(Double_t(genVpt),1000.))")#Weights applied in 250-1000 GeV gen V pt range
+        #NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
+        #NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
+        #a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        #a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
 
 
 

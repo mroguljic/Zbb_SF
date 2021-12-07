@@ -102,6 +102,10 @@ if(options.year=="2017"):
 if(options.year=="2018"):
     deepJetM = 0.2783 
 
+if(year=="2016"):
+    eta_cut = 2.4
+else:
+    eta_cut = 2.5
 
 if("TTbar" in options.process):
     a.Define("topIdx","getPartIdx(nGenPart,GenPart_pdgId,GenPart_statusFlags,6)")
@@ -151,8 +155,32 @@ elif(year=="2018"):
 
 if("ZJets" in options.process or "WJets" in options.process):
     a.Define("genVpt","genVpt(nGenPart,GenPart_pdgId,GenPart_pt,GenPart_statusFlags)")
+    a.Define("nAK4_30","nAK4(nJet,Jet_eta,Jet_pt,30,{0})".format(eta_cut))
+    a.Define("nAK4_50","nAK4(nJet,Jet_eta,Jet_pt,50,{0})".format(eta_cut))
+    a.Define("nAK8_100","nAK4(nFatJet,FatJet_eta,FatJet_pt,100,{0})".format(eta_cut))#nAK4 works with AK8 collection as well
+    a.Define("nAK8_200","nAK4(nFatJet,FatJet_eta,FatJet_pt,200,{0})".format(eta_cut))#nAK4 works with AK8 collection as well
+    a.Define("nGenHardPart","nPartHardProcess(nGenPart,GenPart_pdgId,GenPart_statusFlags)")
+    a.Define("nLHEOutgoingPart","nLHEPartOutgoing(nLHEPart,LHEPart_pdgId,LHEPart_status)")
+    a.Define("nAK4_30_extra","nAK4Extra(nJet,Jet_eta,Jet_phi,Jet_pt,30,{0},FatJet_eta,FatJet_phi)".format(eta_cut))
     hvPt = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_gen_V_pT'.format(options.process),';Gen V pT [GeV]; Events/10 GeV;',200,0,2000),"genVpt","genWeight")
+    h_HT = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_HT'.format(options.process),';HT [GeV]; Events/10 GeV;',200,0,2000),"LHE_HT","genWeight")
+    h_LHEnJets = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_LHEnJets'.format(options.process),';LHE_Njets; Events/1;',11,-0.5,10.5),"LHE_Njets","genWeight")
+    h_LHEnPart = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_LHEnPart'.format(options.process),';LHE_nPartons; Events/1;',11,-0.5,10.5),"nLHEOutgoingPart","genWeight")
+    h_GennPart = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_GennPart'.format(options.process),';Gen_nPartons; Events/1;',11,-0.5,10.5),"nGenHardPart","genWeight")
+    h_nAK4_30  = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_n_AK4_30'.format(options.process),';nAK4; Events/1;',11,-0.5,10.5),"nAK4_30","genWeight")
+    h_nAK4_50  = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_n_AK4_50'.format(options.process),';nAK4; Events/1;',11,-0.5,10.5),"nAK4_50","genWeight")
+    h_nAK8_100 = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_n_AK8_100'.format(options.process),';nAK8; Events/1;',11,-0.5,10.5),"nAK8_100","genWeight")
+    h_nAK8_200 = a.GetActiveNode().DataFrame.Histo1D(('{0}_no_cuts_n_AK8_200'.format(options.process),';nAK8; Events/1;',11,-0.5,10.5),"nAK8_200","genWeight")
+
     histos.append(hvPt)
+    histos.append(h_HT)
+    histos.append(h_LHEnJets)
+    histos.append(h_LHEnPart)
+    histos.append(h_GennPart)
+    histos.append(h_nAK4_30)
+    histos.append(h_nAK4_50)
+    histos.append(h_nAK8_100)
+    histos.append(h_nAK8_200)
 
 
 a.Cut("MET_Filters",MetFiltersString)
@@ -165,15 +193,12 @@ nTrig = getNweighted(a,isData)
 
 
 #Jet(s) definition
-a.Cut("nFatJet","nFatJet>0")
-a.Cut("ID","FatJet_jetId[0]>1")#bit 1 is loose, bit 2 is tight, bit3 is tightlepVeto, we select tight
+a.Cut("nFatJet","nFatJet>1")
+a.Cut("ID","FatJet_jetId[0]>1 && FatJet_jetId[1]>1")#bit 1 is loose, bit 2 is tight, bit3 is tightlepVeto, we select tight
 nJetID = getNweighted(a,isData)
-if(year=="2016"):
-    eta_cut = 2.4
-else:
-    eta_cut = 2.5
 
-a.Cut("Eta","abs(FatJet_eta[0])<{0}".format(eta_cut))
+
+a.Cut("Eta","abs(FatJet_eta[0])<{0} && abs(FatJet_eta[1])<{0}".format(eta_cut))
 nEta = getNweighted(a,isData)
 
 
@@ -200,6 +225,7 @@ else:
     evtColumns.Add("mSD",'jmrSmearer.smearMsd(%s)'%(smearString1))
 
 evtColumns.Add("FatJet_pt0","{0}[0]".format(ptVar))
+evtColumns.Add("FatJet_pt1","{0}[1]".format(ptVar))
 evtColumns.Add("FatJet_eta0","FatJet_eta[0]")
 evtColumns.Add("FatJet_phi0","FatJet_phi[0]")
 evtColumns.Add("nEle","nElectrons(nElectron,Electron_cutBased,0,Electron_pt,20,Electron_eta)")
@@ -227,13 +253,34 @@ evtColumns.Add("topVetoFlag","topVeto(FatJet_eta0,FatJet_phi0,nJet,Jet_eta,{0},J
 a.Apply([evtColumns])
 
 a.Cut("pT","FatJet_pt0>450")
+a.Cut("pT_subl","FatJet_pt1>200")
 npT = getNweighted(a,isData)
 
 a.Cut("mSDCut","mSD>40")
 nmSD = getNweighted(a,isData)
 
-hvPt_sel = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_gen_V_pT'.format(options.process),';Gen V pT [GeV]; Events/10 GeV;',200,0,2000),"genVpt","genWeight")
-histos.append(hvPt_sel)
+if("ZJets" in options.process or "WJets" in options.process):
+    hvPt = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_gen_V_pT'.format(options.process),';Gen V pT [GeV]; Events/10 GeV;',200,0,2000),"genVpt","genWeight")
+    h_HT = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_HT'.format(options.process),';HT [GeV]; Events/10 GeV;',200,0,2000),"LHE_HT","genWeight")
+    h_LHEnJets = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_LHEnJets'.format(options.process),';LHE_Njets; Events/1;',11,-0.5,10.5),"LHE_Njets","genWeight")
+    h_LHEnPart = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_LHEnPart'.format(options.process),';LHE_nPartons; Events/1;',11,-0.5,10.5),"nLHEOutgoingPart","genWeight")
+    h_GennPart = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_GennPart'.format(options.process),';Gen_nPartons; Events/1;',11,-0.5,10.5),"nGenHardPart","genWeight")
+    h_nAK4_30 = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_n_AK4_30'.format(options.process),';nAK4; Events/1;',11,-0.5,10.5),"nAK4_30","genWeight")
+    h_nAK4_30_extra = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_n_AK4_30_away'.format(options.process),';nAK4; Events/1;',11,-0.5,10.5),"nAK4_30_extra","genWeight")
+    h_nAK4_50 = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_n_AK4_50'.format(options.process),';nAK4; Events/1;',11,-0.5,10.5),"nAK4_50","genWeight")
+    h_nAK8_100 = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_n_AK8_100'.format(options.process),';nAK8; Events/1;',11,-0.5,10.5),"nAK8_100","genWeight")
+    h_nAK8_200 = a.GetActiveNode().DataFrame.Histo1D(('{0}_jet_sel_n_AK8_200'.format(options.process),';nAK8; Events/1;',11,-0.5,10.5),"nAK8_200","genWeight")
+
+    histos.append(hvPt)
+    histos.append(h_HT)
+    histos.append(h_LHEnJets)
+    histos.append(h_LHEnPart)
+    histos.append(h_GennPart)
+    histos.append(h_nAK4_30)
+    histos.append(h_nAK4_30_extra)
+    histos.append(h_nAK4_50)
+    histos.append(h_nAK8_100)
+    histos.append(h_nAK8_200)
 
 
 a.Cut("LeptonVeto","nMu==0 && nEle==0")
@@ -262,11 +309,12 @@ if(varName=="nom"):
     if(isData):
         a.Cut("MET For Trigger",MetFiltersString)
     #need to change names to create nodes with different names than already existing
-    a.Cut("nFatJet_ForTrigger","nFatJet>0")
-    a.Cut("Eta_ForTrigger","abs(FatJet_eta[0])<{0}".format(eta_cut))
+    a.Cut("nFatJet_ForTrigger","nFatJet>1")
+    a.Cut("Eta_ForTrigger","abs(FatJet_eta[0])<{0} && abs(FatJet_eta[1])<{0}".format(eta_cut))
     evtColumns.name = "Event Columns For Trigger"
     a.Apply([evtColumns])
     a.Cut("pT_ForTrigger","FatJet_pt0>450")
+    a.Cut("pT_subl_ForTrigger","FatJet_pt1>200")
     a.Cut("mSDCut_ForTrigger","mSD>40")
     a.Cut("LeptonVeto_ForTrigger","nMu==0 && nEle==0")
     a.Cut("topVeto_ForTrigger","topVetoFlag==0")
@@ -290,9 +338,11 @@ if(varName=="nom"):
 #Categorize ZJets
 if("ZJets" in options.process):
     a.Define("jetCat","classifyZJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
+    a.Define("Vmatched","VinJet(FatJet_phi0,FatJet_eta0,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
 #Categorize WJets 
 if("WJets" in options.process):
     a.Define("jetCat","classifyWJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
+    a.Define("Vmatched","VinJet(FatJet_phi0,FatJet_eta0,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
 
 snapshotColumns = ["pnet0","FatJet_pt0","mSD","PV_npvsGood","nFatJet"]
 
@@ -319,6 +369,8 @@ if not isData:
     if("ZJets" in options.process or "WJets" in options.process):
         snapshotColumns.append("jetCat")
         snapshotColumns.append("genVpt")
+        snapshotColumns.append("LHE_HT")
+        snapshotColumns.append("Vmatched")
 
 if(year=="2018"):
     snapshotColumns.append("HEMweight")
