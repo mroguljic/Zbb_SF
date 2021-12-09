@@ -48,7 +48,7 @@ CompileCpp("TIMBER/Framework/deltaRMatching.cc")
 CompileCpp("TIMBER/Framework/helperFunctions.cc") 
 CompileCpp("TIMBER/Framework/TTstitching.cc") 
 CompileCpp("TIMBER/Framework/SemileptonicFunctions.cc") 
-CompileCpp("TIMBER/Framework/semiResolvedFunctions.cc") 
+#CompileCpp("TIMBER/Framework/semiResolvedFunctions.cc") 
 CompileCpp("TIMBER/Framework/src/JMSUncShifter.cc") 
 CompileCpp("TIMBER/Framework/ZbbSF/Zbb_Functions.cc") 
 CompileCpp("JMSUncShifter jmsShifter = JMSUncShifter();") 
@@ -338,11 +338,11 @@ if(varName=="nom"):
 #Categorize ZJets
 if("ZJets" in options.process):
     a.Define("jetCat","classifyZJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
-    a.Define("Vmatched","VinJet(FatJet_phi0,FatJet_eta0,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
+    a.Define("VmatchedFatJetIdx","VmatchedFatJetIdx(nFatJet,FatJet_phi,FatJet_eta,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
 #Categorize WJets 
 if("WJets" in options.process):
     a.Define("jetCat","classifyWJet(FatJet_phi0, FatJet_eta0, nGenPart, GenPart_phi, GenPart_eta, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_statusFlags)")
-    a.Define("Vmatched","VinJet(FatJet_phi0,FatJet_eta0,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
+    a.Define("VmatchedFatJetIdx","VmatchedFatJetIdx(nFatJet,FatJet_phi,FatJet_eta,nGenPart,GenPart_phi,GenPart_eta,GenPart_pdgId,GenPart_statusFlags)")
 
 snapshotColumns = ["pnet0","FatJet_pt0","mSD","PV_npvsGood","nFatJet"]
 
@@ -370,7 +370,7 @@ if not isData:
         snapshotColumns.append("jetCat")
         snapshotColumns.append("genVpt")
         snapshotColumns.append("LHE_HT")
-        snapshotColumns.append("Vmatched")
+        snapshotColumns.append("VmatchedFatJetIdx")
 
 if(year=="2018"):
     snapshotColumns.append("HEMweight")
