@@ -52,7 +52,7 @@ def plotTriggerEff(hPass,hTotal,year,luminosity,outFile):
     plt.savefig(outFile)
     plt.clf()
 
-def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="35.9",proj="X"):
+def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="36.3",proj="X"):
     histos = []
     labels  = []
     edges   = []
@@ -219,8 +219,6 @@ def merge_low_sig_high(hLow,hSig,hHigh,hName="temp"):
     return h_res
 
 def get2DPostfitPlot(file,process,region,tagging):
-    #regoin LL/TT, tagging fail/pass
-    #process 16_TTbar_bqq, data_obs, qcd
     f       = r.TFile.Open(file)
     hLow    = f.Get("{0}_LOW_{1}_postfit/{2}".format(tagging,region,process))
     hSig    = f.Get("{0}_SIG_{1}_postfit/{2}".format(tagging,region,process))
@@ -313,10 +311,10 @@ def plotShapes(hData,hMC,uncBand,labelsMC,colorsMC,xlabel,outputFile,xRange=[],y
         yMaximum = max(hData)*1.5+10.
         axs[0].set_ylim([0.,yMaximum])
 
-    lumiText = "138$fb^{-1} (13 TeV)$"    
+    lumiText = "36.3$ fb^{-1} (13 TeV)$"    
     hep.cms.lumitext(lumiText)
     hep.cms.text("WiP",loc=0)
-    plt.legend(loc='best',ncol=2)
+    plt.legend(loc=1,ncol=2)
 
     if(projectionText):
         plt.text(0.60, 0.15, projectionText, horizontalalignment='center',verticalalignment='center',transform=axs[0].transAxes)
@@ -352,7 +350,88 @@ def printYields(data_proj,hMC,procs):
 
 
 def plotPostfit():
-    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_SF_22_16/postfitshapes_s.root"
+    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_r_22/postfitshapes_s.root"
+    regionsToPlot      = ["T","F"]
+    labelsMC           = ["Multijet",r"t$\bar{t}$","WJets_c","WJets_light","ZJets_bb","ZJets_cc","ZJets_light"]
+    colorsMC           = ["khaki","lightcoral","palegreen","blueviolet"]
+    plotSlices         = True
+
+
+    for region in regionsToPlot:
+
+        taggingCat = "pass"
+        dirRegion  = region
+
+        if(region=="F"):
+            taggingCat = "fail"
+            dirRegion  = "T"
+
+        #Merge sliced histograms
+        dataShape       = get2DPostfitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat)
+        qcdShape        = get2DPostfitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat)
+        TTShape         = get2DPostfitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat)
+        WJetsCShape     = get2DPostfitPlot(postfitShapesFile,"WJets_c",dirRegion,taggingCat)
+        WJetsLightShape = get2DPostfitPlot(postfitShapesFile,"WJets_light",dirRegion,taggingCat)
+        ZJetsBBShape    = get2DPostfitPlot(postfitShapesFile,"ZJets_b",dirRegion,taggingCat)
+        ZJetsCCShape    = get2DPostfitPlot(postfitShapesFile,"ZJets_c",dirRegion,taggingCat)
+        ZJetsLightShape = get2DPostfitPlot(postfitShapesFile,"ZJets_light",dirRegion,taggingCat)
+        totalProcs      = get2DPostfitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat)
+
+        #Get prefit for yields
+        data_proj_pre           = get2DPrefitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat).ProjectionX()
+        qcd_proj_pre            = get2DPrefitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat).ProjectionX()
+        TT_proj_pre             = get2DPrefitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat).ProjectionX()
+        WJets_c_proj_pre        = get2DPrefitPlot(postfitShapesFile,"WJets_c",dirRegion,taggingCat).ProjectionX()
+        WJets_light_proj_pre    = get2DPrefitPlot(postfitShapesFile,"WJets_light",dirRegion,taggingCat).ProjectionX()
+        ZJets_bb_proj_pre       = get2DPrefitPlot(postfitShapesFile,"ZJets_b",dirRegion,taggingCat).ProjectionX()
+        ZJets_cc_proj_pre       = get2DPrefitPlot(postfitShapesFile,"ZJets_c",dirRegion,taggingCat).ProjectionX()
+        ZJets_light_proj_pre    = get2DPrefitPlot(postfitShapesFile,"ZJets_light",dirRegion,taggingCat).ProjectionX()
+        totalProcs_pre          = get2DPrefitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat).ProjectionX()
+        hMC_pre                 = [qcd_proj_pre,TT_proj_pre,WJets_c_proj_pre,WJets_light_proj_pre,ZJets_bb_proj_pre,ZJets_cc_proj_pre,ZJets_light_proj_pre,totalProcs_pre]
+        uncBand_proj_pre        = getUncBand(totalProcs_pre)
+        
+        if(plotSlices):
+            #Plot mSD
+            for i in range(1,dataShape.GetNbinsY()+1):
+                data_proj           = dataShape.ProjectionX("data_projx_{0}".format(i),i,i)
+                qcd_proj            = qcdShape.ProjectionX("qcd_projx_{0}".format(i),i,i)
+                ttbar_proj          = TTShape.ProjectionX("ttbar_projx_{0}".format(i),i,i)
+                wjets_c_proj        = WJetsCShape.ProjectionX("wjets_c_projx_{0}".format(i),i,i)
+                wjets_light_proj    = WJetsLightShape.ProjectionX("wjets_light_projx_{0}".format(i),i,i)
+                zjets_bb_proj       = ZJetsBBShape.ProjectionX("zjets_bb_projx_{0}".format(i),i,i)
+                zjets_cc_proj       = ZJetsCCShape.ProjectionX("zjets_cc_projx_{0}".format(i),i,i)
+                zjets_light_proj    = ZJetsLightShape.ProjectionX("zjets_light_projx_{0}".format(i),i,i)
+                totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx_{0}".format(i),i,i)
+                hMC                 = [qcd_proj,ttbar_proj,wjets_c_proj,wjets_light_proj,zjets_bb_proj,zjets_cc_proj,zjets_light_proj,totalProcs_proj]
+                uncBand_proj        = getUncBand(totalProcs_proj)
+                projLowEdge         = int(dataShape.GetYaxis().GetBinLowEdge(i))
+                projUpEdge          = int(dataShape.GetYaxis().GetBinUpEdge(i))
+                projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
+
+                plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}_{1}.png".format(region,i),xRange=[50,150],projectionText=projectionText)
+            #Plot pT TBD
+
+
+        data_proj           = dataShape.ProjectionX("data_projx")
+        qcd_proj            = qcdShape.ProjectionX("qcd_projx")
+        ttbar_proj          = TTShape.ProjectionX("ttbar_projx")
+        wjets_c_proj        = WJetsCShape.ProjectionX("wjets_c_projx")
+        wjets_light_proj    = WJetsLightShape.ProjectionX("wjets_light_projx")
+        zjets_bb_proj       = ZJetsBBShape.ProjectionX("zjets_bb_projx")
+        zjets_cc_proj       = ZJetsCCShape.ProjectionX("zjets_cc_projx")
+        zjets_light_proj    = ZJetsLightShape.ProjectionX("zjets_light_projx")
+        totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx")
+        hMC                 = [qcd_proj,ttbar_proj,wjets_c_proj,wjets_light_proj,zjets_bb_proj,zjets_cc_proj,zjets_light_proj,totalProcs_proj]
+        procs               = ["Multijet","TTbar","WJets_c","WJets_light","ZJets_bb","ZJets_cc","ZJets_light"]
+        uncBand_proj        = getUncBand(totalProcs_proj)
+
+        print("Yields in {0}".format(region))
+        printYields(data_proj,hMC,procs)
+        printYields(data_proj,hMC_pre,procs)
+        plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}.png".format(region),xRange=[50,150])
+
+def plotRfit():
+    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_r_22/postfitshapes_s.root"
     regionsToPlot      = ["T","F"]
     labelsMC           = ["Multijet",r"t$\bar{t}$","WJets","ZJets"]
     colorsMC           = ["khaki","lightcoral","palegreen","blueviolet"]
@@ -401,7 +480,7 @@ def plotPostfit():
                 projUpEdge          = int(dataShape.GetYaxis().GetBinUpEdge(i))
                 projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
 
-                plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}_{1}.png".format(region,i),xRange=[50,150],projectionText=projectionText)
+                plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/r_fit/MSD_{0}_{1}.png".format(region,i),xRange=[50,150],projectionText=projectionText)
             #Plot pT TBD
 
 
@@ -418,27 +497,11 @@ def plotPostfit():
         print("Yields in {0}".format(region))
         printYields(data_proj,hMC,procs)
         printYields(data_proj,hMC_pre,procs)
-        plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}.png".format(region),xRange=[50,150])
+        plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/r_fit/MSD_{0}.png".format(region),xRange=[50,150])
 
 
 
-            # data_proj    = dataShape.ProjectionY("data_projy")
-            # qcd_proj     = qcdShape.ProjectionY("qcd_projy")
-            # ttbar_proj   = TTshape.ProjectionY("ttbar_projy")
-            # totalBkg_proj= totalBkg.ProjectionY("totalbkg_projy")
-            # data_proj    = dataShape.ProjectionY("data_projy")
-            # uncBand_proj = getUncBand(totalBkg_proj)
-
-
-            # signalHistos     = getSignals(massPointsToPlot,dirRegion)
-            # rebinnedSignal   = []
-            # for i in range(len(massPointsToPlot)):
-            #     rebinnedSignal.append(rebinHisto(dataShape,signalHistos[i],"{0}_{1}_rebinned".format(massPointsToPlot[i],region),scale=1.0).ProjectionY("{0}_{1}_projy".format(massPointsToPlot[i],region)))
-            # if("NAL" in region):
-            #     rebinnedSignal = []
-            # plotShapes(data_proj,qcd_proj,ttbar_proj,totalBkg_proj,uncBand_proj,rebinnedSignal,labelsSignal,["darkred","blue","green"],"$M_{JJ}$ [GeV]","hadronicPostfitPlots/{0}_MJJ.png".format(region),xRange=[800.,4000.],yRange=[0.,ymax[region]])
-
-def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="35.9",proj=""):
+def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="36.3",proj=""):
     histos = []
     labels  = []
     edges   = []
@@ -448,7 +511,7 @@ def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,
     labelsData = []
     data = sorted(data.items(), key=lambda x: x[1]["order"])#VERY HANDY, reads samples in order
     for sample, sample_cfg in data:
-        if not(("ZJets" in samples) or ("WJets" in sample)):
+        if not(("ZJets" in sample) or ("WJets" in sample)):
             continue
 
         tempFile = r.TFile.Open(sample_cfg["file"])
@@ -468,7 +531,7 @@ def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,
     plt.style.use([hep.style.CMS])
     f, ax = plt.subplots()
 
-    hep.histplot(histos,edges[0],stack=True,ax=ax,label=labels,linewidth=1,histtype="fill",facecolor=colors,edgecolor='black')
+    hep.histplot(histos,edges[0],stack=False,ax=ax,label=labels,linewidth=3,histtype="step",color=colors)
     if(log):
         ax.set_yscale("log")
     ax.legend()
@@ -482,7 +545,7 @@ def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,
         ax.set_xlim(xRange)
     lumiText = luminosity + " $fb^{-1}\ (13 TeV)$"
     hep.cms.lumitext(text=lumiText, ax=ax, fontname=None, fontsize=None)
-    hep.cms.text("WiP",loc=0)
+    hep.cms.text("Simulation WiP",loc=0)
     plt.tight_layout()
     plt.legend(loc="best",ncol=2)#loc = 'best'
 
@@ -495,73 +558,82 @@ def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,
 
 if __name__ == '__main__':
     #Postfit
-    # plotPostfit()
+    #plotPostfit()
+    plotRfit()
 
     #Control vars
-    parser = OptionParser()
-    parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
-                default   =   '',
-                dest      =   'json',
-                help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
-            default   =   '',
-            dest      =   'year',
-            help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    (options, args) = parser.parse_args()
-    odir = "results/plots/{0}/".format(options.year)
+    # parser = OptionParser()
+    # parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
+    #             default   =   '',
+    #             dest      =   'json',
+    #             help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    # parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
+    #         default   =   '',
+    #         dest      =   'year',
+    #         help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    # (options, args) = parser.parse_args()
+    # odir = "results/plots/{0}/".format(options.year)
 
-    year = options.year
-    if(year=="2016"):
-        luminosity="36.3"
-    elif(year=="2017"):
-        luminosity="41.5"
-    elif(year=="2018"):
-        luminosity="59.8"
-    elif(year=="RunII"):
-        luminosity="138"
-    else:
-        print("Year not specified")
-        luminosity="0"
+    # year = options.year
+    # if(year=="2016"):
+    #     luminosity="36.3"
+    # elif(year=="2017"):
+    #     luminosity="41.5"
+    # elif(year=="2018"):
+    #     luminosity="59.8"
+    # elif(year=="RunII"):
+    #     luminosity="138"
+    # else:
+    #     print("Year not specified")
+    #     luminosity="0"
 
-    with open(options.json) as json_file:
-        data = json.load(json_file)
+    # with open(options.json) as json_file:
+    #     data = json.load(json_file)
 
-        plotVarStack(data,"m_pT_T_nom","plots/2016/T_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
-        plotVarStack(data,"m_pT_L_nom","plots/2016/L_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
-        plotVarStack(data,"m_pT_F_nom","plots/2016/F_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity="36.3")
+    #     plotVarStack(data,"m_pT_T_nom","plots/2016/T_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity=luminosity)
+    #     plotVarStack(data,"m_pT_L_nom","plots/2016/L_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity=luminosity)
+    #     plotVarStack(data,"m_pT_F_nom","plots/2016/F_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity=luminosity)
 
-        plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-        plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-        plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+    #     plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
+    #     plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
+    #     plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_lin_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
 
-        plotVarStack(data,"m_pT_T_nom","plots/2016/T_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-        plotVarStack(data,"m_pT_L_nom","plots/2016/L_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-        plotVarStack(data,"m_pT_F_nom","plots/2016/F_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=5,luminosity="36.3")
-
-
-        plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-        plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
-        plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity="36.3",proj="Y")
+    #     plotVarStack(data,"m_pT_T_nom","plots/2016/T_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=5,luminosity=luminosity)
+    #     plotVarStack(data,"m_pT_L_nom","plots/2016/L_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=5,luminosity=luminosity)
+    #     plotVarStack(data,"m_pT_F_nom","plots/2016/F_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=5,luminosity=luminosity)
 
 
-        f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
-        hTotal = f.Get("data_obs_pT0noTriggers_nom")
-        hPass  = f.Get("data_obs_pT0triggersAll_nom")
-        eff = r.TEfficiency(hPass,hTotal)
-        eff.SetName("trig_eff")
-        print(eff.GetName())
-        g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
-        g.cd()
-        eff.Write()
-        g.Close()
-
-        plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
+    #     plotVarStack(data,"m_pT_T_nom","plots/2016/T_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
+    #     plotVarStack(data,"m_pT_L_nom","plots/2016/L_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
+    #     plotVarStack(data,"m_pT_F_nom","plots/2016/F_pT_data.png",xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=5,luminosity=luminosity,proj="Y")
 
 
+        # f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
+        # hTotal = f.Get("data_obs_pT0noTriggers_nom")
+        # hPass  = f.Get("data_obs_pT0triggersAll_nom")
+        # eff = r.TEfficiency(hPass,hTotal)
+        # eff.SetName("trig_eff")
+        # print(eff.GetName())
+        # g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
+        # g.cd()
+        # eff.Write()
+        # g.Close()
 
-    plotVJets(data,"VpT_F_nom","plots/2016/F_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
-    plotVJets(data,"VpT_L_nom","plots/2016/L_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
-    plotVJets(data,"VpT_T_nom","plots/2016/T_vpT.png",xTitle="$V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,rebinX=1,luminosity="35.9")
+        # plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
+
+
+
+    # plotVJets(data,"VpT_F_nom","plots/2016/F_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,4500],rebinX=1,luminosity=luminosity)
+    # plotVJets(data,"VpT_L_nom","plots/2016/L_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,100],rebinX=1,luminosity=luminosity)
+    # plotVJets(data,"VpT_T_nom","plots/2016/T_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
+    # plotVJets(data,"VpT_F_nom","plots/2016/F_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+    # plotVJets(data,"VpT_L_nom","plots/2016/L_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**2],rebinX=1,luminosity=luminosity)
+    # plotVJets(data,"VpT_T_nom","plots/2016/T_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
+
+
+    # plotVJets(data,"m_pT_F_nom","plots/2016/F_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,2500],rebinX=1,luminosity=luminosity,proj="X")
+    # plotVJets(data,"m_pT_L_nom","plots/2016/L_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,70],rebinX=1,luminosity=luminosity,proj="X")
+    # plotVJets(data,"m_pT_T_nom","plots/2016/T_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,180],rebinX=1,luminosity=luminosity,proj="X")
 
 
 
