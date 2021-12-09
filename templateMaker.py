@@ -17,10 +17,10 @@ def getNweighted(analyzer,isData):
 
 def separateVHistos(analyzer,process,region):
     cats = {
-    "light" : "jetCat==0 && Vmatched==1",
-    "c"     : "jetCat==1 && Vmatched==1",
-    "b"     : "jetCat==2 && Vmatched==1",
-    "unm"   : "Vmatched==0"}
+    "light" : "jetCat==1",
+    "c"     : "jetCat==2",
+    "b"     : "jetCat==3",
+    "unm"   : "jetCat==0"}
 
     separatedHistos = []
     beforeNode = analyzer.GetActiveNode()
@@ -100,18 +100,18 @@ if not isData:
         ptrwtCorr = Correction('topPtReweighting',"TIMBER/Framework/src/TopPt_reweighting.cc",corrtype='weight')
         a.AddCorrection(ptrwtCorr, evalArgs={'genTPt':'topPt','genTbarPt':'antitopPt'})
     if("WJets" in options.process):
-        qcdName = "W_NLO_QCD_2016"
+        qcdName = "QCD_W_16"
         ewkName = "EWK_W"
     if("ZJets" in options.process):
-        qcdName = "Z_NLO_QCD_2016"
+        qcdName = "QCD_Z_16"
         ewkName = "EWK_Z"
     if("WJets" in options.process or "ZJets" in options.process):
         NLOfile = "data/NLO_corrections.root"
-        #a.Define("genVpt_rescaled","TMath::Max(250.,TMath::Min(Double_t(genVpt),1000.))")#Weights applied in 250-1000 GeV gen V pt range
-        #NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
-        #NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
-        #a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
-        #a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        a.Define("genVpt_rescaled","TMath::Max(300.,TMath::Min(Double_t(genVpt),3000.))")#Weights applied in 300-3000 GeV gen V pt range
+        NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
+        NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
+        a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
 
 
 
@@ -142,6 +142,25 @@ if(year=="2018"):
 
 a.Define("evtWeight","genWeight*{0}".format(weightString))
 
+
+if(variation=="nom" and ("ZJets" in options.process or "WJets" in options.process)):
+    a.MakeWeightCols('noKFactors',dropList=["qcd_nlo","ewk_nlo"])
+    a.Define("noKFactors_weight","genWeight*weight_noKFactors__nominal")
+    
+    hHTnoK  = a.DataFrame.Histo1D(('{0}_HT_noKFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","noKFactors_weight")
+    hpTnoK  = a.DataFrame.Histo1D(('{0}_pT_noKFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","noKFactors_weight")
+    hVpTnoK = a.DataFrame.Histo1D(('{0}_VpT_noKFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","noKFactors_weight")
+    hMSDnoK = a.DataFrame.Histo1D(('{0}_mSD_noKFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","noKFactors_weight")
+
+    hHT     = a.DataFrame.Histo1D(('{0}_HT_KFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","evtWeight")
+    hpT     = a.DataFrame.Histo1D(('{0}_pT_KFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","evtWeight")
+    hVpT    = a.DataFrame.Histo1D(('{0}_VpT_KFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","evtWeight")
+    hMSD    = a.DataFrame.Histo1D(('{0}_mSD_KFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","evtWeight")    
+
+    histos.extend([hHTnoK,hpTnoK,hVpTnoK,hMSDnoK])
+    histos.extend([hHT,hpT,hVpT,hMSD])
+
+
 regionDefs = [("T","pnet0>{0}".format(pnetT)),("L","pnet0>{0} && pnet0<{1}".format(pnetL,pnetT)),("F","pnet0<{0}".format(pnetL))]
 regionYields = {}
 
@@ -153,12 +172,15 @@ checkpoint = a.GetActiveNode()
 for region,cut in regionDefs:
     a.SetActiveNode(checkpoint)
     a.Cut("{0}_cut".format(region),cut)
-    h2d = a.DataFrame.Histo2D(('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
-    histos.append(h2d)
-    regionYields[region] = getNweighted(a,isData)
     if("ZJets" in options.process or "WJets" in options.process):
         categorizedHistos = separateVHistos(a,options.process,region)
         histos.extend(categorizedHistos)
+    if("ZJets" in options.process or "WJets" in options.process):
+        #For "inclusive flavour", still keep only jets matched to V
+        a.Cut("{0}_matched_V_cut".format(region),"jetCat>0")
+    h2d = a.DataFrame.Histo2D(('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
+    histos.append(h2d)
+    regionYields[region] = getNweighted(a,isData)
 
 #include histos from evt sel in the template file for nominal template
 if(options.variation=="nom"):
