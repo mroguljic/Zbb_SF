@@ -228,8 +228,6 @@ def get2DPostfitPlot(file,process,region,tagging):
     return h2
 
 def get2DPrefitPlot(file,process,region,tagging):
-    #regoin LL/TT, tagging fail/pass
-    #process 16_TTbar_bqq, data_obs, qcd
     f       = r.TFile.Open(file)
     hLow    = f.Get("{0}_LOW_{1}_prefit/{2}".format(tagging,region,process))
     hSig    = f.Get("{0}_SIG_{1}_prefit/{2}".format(tagging,region,process))
@@ -269,7 +267,6 @@ def calculatePull(hData,dataErrors,hTotBkg,uncBand):
     return np.array(pulls)
 
 def plotShapes(hData,hMC,uncBand,labelsMC,colorsMC,xlabel,outputFile,xRange=[],yRange=[],projectionText=""):
-    print(outputFile)
     dataErrors      = getPoissonErrors(hData)
     hData, edges    = hist2array(hData,return_edges=True)
     centresData     = (edges[0][:-1] + edges[0][1:])/2.#Bin centres
@@ -333,173 +330,87 @@ def plotShapes(hData,hMC,uncBand,labelsMC,colorsMC,xlabel,outputFile,xRange=[],y
     hep.histplot(pulls,edges[0],ax=axs[1],linewidth=1,histtype="fill",facecolor="grey",edgecolor='black')
 
     print("Saving ", outputFile)
+    plt.tight_layout()
     plt.savefig(outputFile,bbox_inches="tight")
     #plt.savefig(outputFile.replace("png","pdf"))
 
     plt.clf()
+    plt.cla()
 
 def printYields(data_proj,hMC,procs):
     for i,proc in enumerate(procs):
         yieldErr  = ctypes.c_double(1.)#ROOT thing
         procYield = hMC[i].IntegralAndError(1,hMC[i].GetNbinsX(),yieldErr,"")
-        print("{0}\t{1:.0f} +/- {2:.0f}".format(proc,procYield,yieldErr.value))
+        print("{0} & {1:.0f} & {2:.0f}".format(proc,procYield,yieldErr.value))
     
     yieldErr  = ctypes.c_double(1.)#ROOT thing
     procYield = data_proj.IntegralAndError(1,data_proj.GetNbinsX(),yieldErr,"")
-    print("Data\t{0:.0f} +/- {1:.0f}".format(procYield,yieldErr.value))
+    print("Data & {0:.0f} & {1:.0f}".format(procYield,yieldErr.value))
+
+def plotPostfit(postfitShapesFile,region,odir,prefitTag=False):
+
+    labels              = ["Data","Multijet",r"t$\bar{t}$","WJets","ZJets"]
+    tags                = ["data_obs","qcd","TTbar","WJets","ZJets"]
+    colors              = ["black","khaki","lightcoral","palegreen","blueviolet"]
+    plotSlices          = True
+
+    if(prefitTag):
+        outFile = "MSD_prefit"
+    else:
+        outFile = "MSD_postfit"
 
 
-def plotPostfit():
-    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_r_22/postfitshapes_s.root"
-    regionsToPlot      = ["T","F"]
-    labelsMC           = ["Multijet",r"t$\bar{t}$","WJets_c","WJets_light","ZJets_bb","ZJets_cc","ZJets_light"]
-    colorsMC           = ["khaki","lightcoral","palegreen","blueviolet"]
-    plotSlices         = True
+    twoDShapes          = []
 
+    taggingCat = "pass"
+    dirRegion  = region
 
-    for region in regionsToPlot:
+    if(region=="F"):
+        taggingCat = "fail"
+        dirRegion  = "T"
 
-        taggingCat = "pass"
-        dirRegion  = region
+    #Merge sliced histograms
+    for tag in tags:
+        if(prefitTag):
+            twoDShape = get2DPrefitPlot(postfitShapesFile,tag,dirRegion,taggingCat)
+        else:
+            twoDShape = get2DPostfitPlot(postfitShapesFile,tag,dirRegion,taggingCat)
+        twoDShapes.append(twoDShape)
 
-        if(region=="F"):
-            taggingCat = "fail"
-            dirRegion  = "T"
-
-        #Merge sliced histograms
-        dataShape       = get2DPostfitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat)
-        qcdShape        = get2DPostfitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat)
-        TTShape         = get2DPostfitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat)
-        WJetsCShape     = get2DPostfitPlot(postfitShapesFile,"WJets_c",dirRegion,taggingCat)
-        WJetsLightShape = get2DPostfitPlot(postfitShapesFile,"WJets_light",dirRegion,taggingCat)
-        ZJetsBBShape    = get2DPostfitPlot(postfitShapesFile,"ZJets_b",dirRegion,taggingCat)
-        ZJetsCCShape    = get2DPostfitPlot(postfitShapesFile,"ZJets_c",dirRegion,taggingCat)
-        ZJetsLightShape = get2DPostfitPlot(postfitShapesFile,"ZJets_light",dirRegion,taggingCat)
-        totalProcs      = get2DPostfitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat)
-
-        #Get prefit for yields
-        data_proj_pre           = get2DPrefitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat).ProjectionX()
-        qcd_proj_pre            = get2DPrefitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat).ProjectionX()
-        TT_proj_pre             = get2DPrefitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat).ProjectionX()
-        WJets_c_proj_pre        = get2DPrefitPlot(postfitShapesFile,"WJets_c",dirRegion,taggingCat).ProjectionX()
-        WJets_light_proj_pre    = get2DPrefitPlot(postfitShapesFile,"WJets_light",dirRegion,taggingCat).ProjectionX()
-        ZJets_bb_proj_pre       = get2DPrefitPlot(postfitShapesFile,"ZJets_b",dirRegion,taggingCat).ProjectionX()
-        ZJets_cc_proj_pre       = get2DPrefitPlot(postfitShapesFile,"ZJets_c",dirRegion,taggingCat).ProjectionX()
-        ZJets_light_proj_pre    = get2DPrefitPlot(postfitShapesFile,"ZJets_light",dirRegion,taggingCat).ProjectionX()
-        totalProcs_pre          = get2DPrefitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat).ProjectionX()
-        hMC_pre                 = [qcd_proj_pre,TT_proj_pre,WJets_c_proj_pre,WJets_light_proj_pre,ZJets_bb_proj_pre,ZJets_cc_proj_pre,ZJets_light_proj_pre,totalProcs_pre]
-        uncBand_proj_pre        = getUncBand(totalProcs_pre)
-        
-        if(plotSlices):
-            #Plot mSD
-            for i in range(1,dataShape.GetNbinsY()+1):
-                data_proj           = dataShape.ProjectionX("data_projx_{0}".format(i),i,i)
-                qcd_proj            = qcdShape.ProjectionX("qcd_projx_{0}".format(i),i,i)
-                ttbar_proj          = TTShape.ProjectionX("ttbar_projx_{0}".format(i),i,i)
-                wjets_c_proj        = WJetsCShape.ProjectionX("wjets_c_projx_{0}".format(i),i,i)
-                wjets_light_proj    = WJetsLightShape.ProjectionX("wjets_light_projx_{0}".format(i),i,i)
-                zjets_bb_proj       = ZJetsBBShape.ProjectionX("zjets_bb_projx_{0}".format(i),i,i)
-                zjets_cc_proj       = ZJetsCCShape.ProjectionX("zjets_cc_projx_{0}".format(i),i,i)
-                zjets_light_proj    = ZJetsLightShape.ProjectionX("zjets_light_projx_{0}".format(i),i,i)
-                totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx_{0}".format(i),i,i)
-                hMC                 = [qcd_proj,ttbar_proj,wjets_c_proj,wjets_light_proj,zjets_bb_proj,zjets_cc_proj,zjets_light_proj,totalProcs_proj]
-                uncBand_proj        = getUncBand(totalProcs_proj)
-                projLowEdge         = int(dataShape.GetYaxis().GetBinLowEdge(i))
-                projUpEdge          = int(dataShape.GetYaxis().GetBinUpEdge(i))
-                projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
-
-                plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}_{1}.png".format(region,i),xRange=[50,150],projectionText=projectionText)
-            #Plot pT TBD
-
-
-        data_proj           = dataShape.ProjectionX("data_projx")
-        qcd_proj            = qcdShape.ProjectionX("qcd_projx")
-        ttbar_proj          = TTShape.ProjectionX("ttbar_projx")
-        wjets_c_proj        = WJetsCShape.ProjectionX("wjets_c_projx")
-        wjets_light_proj    = WJetsLightShape.ProjectionX("wjets_light_projx")
-        zjets_bb_proj       = ZJetsBBShape.ProjectionX("zjets_bb_projx")
-        zjets_cc_proj       = ZJetsCCShape.ProjectionX("zjets_cc_projx")
-        zjets_light_proj    = ZJetsLightShape.ProjectionX("zjets_light_projx")
-        totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx")
-        hMC                 = [qcd_proj,ttbar_proj,wjets_c_proj,wjets_light_proj,zjets_bb_proj,zjets_cc_proj,zjets_light_proj,totalProcs_proj]
-        procs               = ["Multijet","TTbar","WJets_c","WJets_light","ZJets_bb","ZJets_cc","ZJets_light"]
-        uncBand_proj        = getUncBand(totalProcs_proj)
-
-        print("Yields in {0}".format(region))
-        printYields(data_proj,hMC,procs)
-        printYields(data_proj,hMC_pre,procs)
-        plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/postfit/MSD_{0}.png".format(region),xRange=[50,150])
-
-def plotRfit():
-    postfitShapesFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/Zbb_r_22/postfitshapes_s.root"
-    regionsToPlot      = ["T","F"]
-    labelsMC           = ["Multijet",r"t$\bar{t}$","WJets","ZJets"]
-    colorsMC           = ["khaki","lightcoral","palegreen","blueviolet"]
-    plotSlices         = True
-
-
-    for region in regionsToPlot:
-
-        taggingCat = "pass"
-        dirRegion  = region
-
-        if(region=="F"):
-            taggingCat = "fail"
-            dirRegion  = "T"
-
-        #Merge sliced histograms
-        dataShape   = get2DPostfitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat)
-        qcdShape    = get2DPostfitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat)
-        TTShape     = get2DPostfitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat)
-        WJetsShape  = get2DPostfitPlot(postfitShapesFile,"WJets",dirRegion,taggingCat)
-        ZJetsShape  = get2DPostfitPlot(postfitShapesFile,"ZJets",dirRegion,taggingCat)
+    if(prefitTag):
+        totalProcs  = get2DPrefitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat)
+    else:
         totalProcs  = get2DPostfitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat)
+    
+    if(plotSlices):
+        #Plot mSD
+        for i in range(1,totalProcs.GetNbinsY()+1):
+            projections         = []
+            for j,twoDShape in enumerate(twoDShapes):
+                proj        = twoDShape.ProjectionX(tags[j]+"_projx_{0}".format(i),i,i)
+                projections.append(proj)
+            totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx_{0}".format(i),i,i)
+            projections.append(totalProcs_proj)
+            uncBand_proj        = getUncBand(totalProcs_proj)
+            projLowEdge         = int(totalProcs.GetYaxis().GetBinLowEdge(i))
+            projUpEdge          = int(totalProcs.GetYaxis().GetBinUpEdge(i))
+            projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
 
-        #Get prefit for yields
-        data_proj_pre   = get2DPrefitPlot(postfitShapesFile,"data_obs",dirRegion,taggingCat).ProjectionX()
-        qcd_proj_pre    = get2DPrefitPlot(postfitShapesFile,"qcd",dirRegion,taggingCat).ProjectionX()
-        TT_proj_pre     = get2DPrefitPlot(postfitShapesFile,"TTbar",dirRegion,taggingCat).ProjectionX()
-        WJets_proj_pre  = get2DPrefitPlot(postfitShapesFile,"WJets",dirRegion,taggingCat).ProjectionX()
-        ZJets_proj_pre  = get2DPrefitPlot(postfitShapesFile,"ZJets",dirRegion,taggingCat).ProjectionX()
-        totalProcs_pre  = get2DPrefitPlot(postfitShapesFile,"TotalProcs".format(region),dirRegion,taggingCat).ProjectionX()
-        hMC_pre         = [qcd_proj_pre,TT_proj_pre,WJets_proj_pre,ZJets_proj_pre,totalProcs_pre]
-        uncBand_proj_pre= getUncBand(totalProcs_pre)
-        
-        if(plotSlices):
-            #Plot mSD
-            for i in range(1,dataShape.GetNbinsY()+1):
-                data_proj           = dataShape.ProjectionX("data_projx_{0}".format(i),i,i)
-                qcd_proj            = qcdShape.ProjectionX("qcd_projx_{0}".format(i),i,i)
-                ttbar_proj          = TTShape.ProjectionX("ttbar_projx_{0}".format(i),i,i)
-                wjets_proj          = WJetsShape.ProjectionX("wjets_projx_{0}".format(i),i,i)
-                zjets_proj          = ZJetsShape.ProjectionX("zjets_projx_{0}".format(i),i,i)
-                totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx_{0}".format(i),i,i)
-                hMC                 = [qcd_proj,ttbar_proj,wjets_proj,zjets_proj,totalProcs_proj]
-                uncBand_proj        = getUncBand(totalProcs_proj)
-                projLowEdge         = int(dataShape.GetYaxis().GetBinLowEdge(i))
-                projUpEdge          = int(dataShape.GetYaxis().GetBinUpEdge(i))
-                projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
+            plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{SD}$ [GeV]","{0}/{1}_{2}_{3}.png".format(odir,outFile,region,i),xRange=[50,150],projectionText=projectionText)
+        #Plot pT TBD
 
-                plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/r_fit/MSD_{0}_{1}.png".format(region,i),xRange=[50,150],projectionText=projectionText)
-            #Plot pT TBD
+    projections         = []
+    for j,twoDShape in enumerate(twoDShapes):
+        proj            = twoDShape.ProjectionX(tags[j]+"_projx")
+        projections.append(proj)
+    totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx")
+    projections.append(totalProcs_proj)
+    uncBand_proj        = getUncBand(totalProcs_proj)
 
+    plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{SD}$ [GeV]","{0}/{1}_{2}.png".format(odir,outFile,region),xRange=[50,150])
 
-        data_proj           = dataShape.ProjectionX("data_projx")
-        qcd_proj            = qcdShape.ProjectionX("qcd_projx")
-        ttbar_proj          = TTShape.ProjectionX("ttbar_projx")
-        wjets_proj          = WJetsShape.ProjectionX("wjets_projx")
-        zjets_proj          = ZJetsShape.ProjectionX("zjets_projx")
-        totalProcs_proj     = totalProcs.ProjectionX("totalprocs_projx")
-        hMC                 = [qcd_proj,ttbar_proj,wjets_proj,zjets_proj,totalProcs_proj]
-        procs               = ["Multijet","TTbar","WJets","Zjets","Total"]
-        uncBand_proj        = getUncBand(totalProcs_proj)
-
-        print("Yields in {0}".format(region))
-        printYields(data_proj,hMC,procs)
-        printYields(data_proj,hMC_pre,procs)
-        plotShapes(data_proj,hMC,uncBand_proj,labelsMC,colorsMC,"$M_{SD}$ [GeV]","plots/2016/r_fit/MSD_{0}.png".format(region),xRange=[50,150])
-
-
+    print("Yields in {0}".format(region))
+    printYields(projections[0],projections[1:],tags[1:])
 
 def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="36.3",proj=""):
     histos = []
@@ -555,40 +466,135 @@ def plotVJets(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,
 
     plt.clf()
 
+def plotLines(hList,labels,colors,xlabel,linestyles,outputFile,xRange=[],yRange=[],projectionText=""):
+    histos        = []
+    for h in hList:
+        histo,edges = hist2array(h,return_edges=True)
+        histos.append(histo)
+
+
+
+
+    plt.style.use([hep.style.CMS])
+    f, ax = plt.subplots()
+
+    hep.histplot(histos,edges[0],stack=False,ax=ax,label = labels, histtype="step",color=colors,linewidth=3,linestyle=linestyles)
+
+    ax.legend()
+    plt.ylabel("Events/bin",horizontalalignment='right', y=1.0)
+
+    if(xRange):
+        ax.set_xlim(xRange)
+    if(yRange):
+        ax.set_ylim(yRange)
+    else:
+        yMaximum = max(map(max, histos))*1.5
+        ax.set_ylim([0.,yMaximum])
+
+    lumiText = "36.3$ fb^{-1} (13 TeV)$"    
+    hep.cms.lumitext(lumiText)
+    hep.cms.text("Simulation WiP",loc=0)
+    plt.legend(loc=1,ncol=2)
+
+    if(projectionText):
+        plt.text(0.80, 0.85, projectionText, horizontalalignment='center',verticalalignment='center',transform=ax.transAxes)
+
+    print("Saving ", outputFile)
+    plt.tight_layout()
+    plt.savefig(outputFile,bbox_inches="tight")
+
+    plt.clf()
+    plt.cla()
+
+def plotVJetsInFit(postfitShapesFile,region,odir):
+
+    labels              = ["WJets prefit","WJets postfit","ZJets prefit","ZJets postfit"]
+    tags                = ["WJets","ZJets"]
+    colors              = ["red","red","blue","blue"]
+    linestyles          = ["-","--","-","--"]
+    yRanges             = [[0,300],[0,300],[0,200],[0,70]]
+    plotSlices          = True
+
+    twoDShapes          = []
+
+    taggingCat = "pass"
+    dirRegion  = region
+
+    if(region=="F"):
+        taggingCat = "fail"
+        dirRegion  = "T"
+        yRanges    = [[0,7000],[0,7000],[0,3500],[0,1000]]
+
+        #Merge sliced histograms
+    for tag in tags:
+        twoDShape = get2DPrefitPlot(postfitShapesFile,tag,dirRegion,taggingCat)
+        twoDShapes.append(twoDShape)
+        twoDShape = get2DPostfitPlot(postfitShapesFile,tag,dirRegion,taggingCat)
+        twoDShapes.append(twoDShape)
+        
+    if(plotSlices):
+        #Plot mSD
+        for i in range(1,twoDShapes[0].GetNbinsY()+1):
+            projections         = []
+            for j,twoDShape in enumerate(twoDShapes):
+                proj        = twoDShape.ProjectionX(labels[j]+"_projx_{0}".format(i),i,i)
+                projections.append(proj)
+            projLowEdge         = int(twoDShapes[0].GetYaxis().GetBinLowEdge(i))
+            projUpEdge          = int(twoDShapes[0].GetYaxis().GetBinUpEdge(i))
+            projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
+
+            plotLines(projections,labels,colors,"M_{SD} [GeV]",linestyles,"{0}/VJets_{1}_{2}.png".format(odir,region,i),xRange=[50,150],yRange=yRanges[i-1],projectionText=projectionText)
 
 if __name__ == '__main__':
     #Postfit
-    #plotPostfit()
-    plotRfit()
+    kFactorFile =  "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/2016_Z_r_kFactors/postfitshapes_s.root"
+    noKFactorFile  = "/afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/2DAlphabet/2016_Z_r_nokFactors/postfitshapes_s.root"    
+
+    
+    #plotPostfit(noKFactorFile,"T","plots/2016/r_fit_no_kfactors/")
+    #plotPostfit(noKFactorFile,"F","plots/2016/r_fit_no_kfactors/")    
+    #plotPostfit(noKFactorFile,"T","plots/2016/r_fit_no_kfactors/",prefitTag=True)
+    #plotPostfit(noKFactorFile,"F","plots/2016/r_fit_no_kfactors/",prefitTag=True)
+    #plotVJetsInFit(noKFactorFile,"T","plots/2016/r_fit_no_kfactors/")
+    #plotVJetsInFit(noKFactorFile,"F","plots/2016/r_fit_no_kfactors/")
+
+    #plotPostfit(kFactorFile,"T","plots/2016/r_fit_kfactors/")
+    #plotPostfit(kFactorFile,"F","plots/2016/r_fit_kfactors/")
+    #plotPostfit(kFactorFile,"T","plots/2016/r_fit_kfactors/",prefitTag=True)
+    #plotPostfit(kFactorFile,"F","plots/2016/r_fit_kfactors/",prefitTag=True)
+    #plotVJetsInFit(kFactorFile,"T","plots/2016/r_fit_kfactors/")
+    #plotVJetsInFit(kFactorFile,"F","plots/2016/r_fit_kfactors/")
+
+
 
     #Control vars
-    # parser = OptionParser()
-    # parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
-    #             default   =   '',
-    #             dest      =   'json',
-    #             help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
-    #         default   =   '',
-    #         dest      =   'year',
-    #         help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # (options, args) = parser.parse_args()
-    # odir = "results/plots/{0}/".format(options.year)
+    parser = OptionParser()
+    parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
+                default   =   '',
+                dest      =   'json',
+                help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
+            default   =   '',
+            dest      =   'year',
+            help      =   'Json file containing names, paths to histograms, xsecs etc.')
+    (options, args) = parser.parse_args()
+    odir = "results/plots/{0}/".format(options.year)
 
-    # year = options.year
-    # if(year=="2016"):
-    #     luminosity="36.3"
-    # elif(year=="2017"):
-    #     luminosity="41.5"
-    # elif(year=="2018"):
-    #     luminosity="59.8"
-    # elif(year=="RunII"):
-    #     luminosity="138"
-    # else:
-    #     print("Year not specified")
-    #     luminosity="0"
+    year = options.year
+    if(year=="2016"):
+        luminosity="36.3"
+    elif(year=="2017"):
+        luminosity="41.5"
+    elif(year=="2018"):
+        luminosity="59.8"
+    elif(year=="RunII"):
+        luminosity="138"
+    else:
+        print("Year not specified")
+        luminosity="0"
 
-    # with open(options.json) as json_file:
-    #     data = json.load(json_file)
+    with open(options.json) as json_file:
+        data = json.load(json_file)
 
     #     plotVarStack(data,"m_pT_T_nom","plots/2016/T_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity=luminosity)
     #     plotVarStack(data,"m_pT_L_nom","plots/2016/L_lin_data.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=5,luminosity=luminosity)
@@ -623,14 +629,17 @@ if __name__ == '__main__':
 
 
 
-    # plotVJets(data,"VpT_F_nom","plots/2016/F_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,4500],rebinX=1,luminosity=luminosity)
-    # plotVJets(data,"VpT_L_nom","plots/2016/L_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,100],rebinX=1,luminosity=luminosity)
-    # plotVJets(data,"VpT_T_nom","plots/2016/T_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
-    # plotVJets(data,"VpT_F_nom","plots/2016/F_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
-    # plotVJets(data,"VpT_L_nom","plots/2016/L_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**2],rebinX=1,luminosity=luminosity)
-    # plotVJets(data,"VpT_T_nom","plots/2016/T_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_I_nom","plots/2016/I_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5000],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_F_nom","plots/2016/F_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5500],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_L_nom","plots/2016/L_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,100],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_T_nom","plots/2016/T_vpT_lin.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_I_nom","plots/2016/I_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_F_nom","plots/2016/F_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_L_nom","plots/2016/L_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**2],rebinX=1,luminosity=luminosity)
+    plotVJets(data,"VpT_T_nom","plots/2016/T_vpT.png",xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
 
 
+    # plotVJets(data,"m_pT_I_nom","plots/2016/I_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,3000],rebinX=1,luminosity=luminosity,proj="X")
     # plotVJets(data,"m_pT_F_nom","plots/2016/F_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,2500],rebinX=1,luminosity=luminosity,proj="X")
     # plotVJets(data,"m_pT_L_nom","plots/2016/L_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,70],rebinX=1,luminosity=luminosity,proj="X")
     # plotVJets(data,"m_pT_T_nom","plots/2016/T_mVJets_lin.png",xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,180],rebinX=1,luminosity=luminosity,proj="X")
