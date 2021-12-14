@@ -10,4 +10,5 @@ results/
 test*txt
 test*root
 testing.py
-
+*test*root
+plots/*
