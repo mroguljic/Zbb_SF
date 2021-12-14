@@ -58,8 +58,7 @@ CompileCpp("JMRUncSmearer jmrSmearer = JMRUncSmearer();")
 
 varName = options.variation
 if(varName=="nom"):
-    #ptVar  = "FatJet_pt_nom"
-    ptVar  = "FatJet_pt"
+    ptVar  = "FatJet_pt_nom"
 elif("jm" in varName):#jmr,jms
     ptVar  = "FatJet_pt_nom"
 elif("je" in varName):#jes,jer
