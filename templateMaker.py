@@ -35,6 +35,28 @@ def separateVHistos(analyzer,process,region):
     analyzer.SetActiveNode(beforeNode)
     return separatedHistos
 
+def getTaggingEfficiencies(analyzer,wpL,wpT,jetCat=3):
+    beforeNode = analyzer.GetActiveNode()
+    a.Cut("jetCat_{0}_forEff".format(jetCat),"jetCat=={0}".format(jetCat))
+    nTot = analyzer.DataFrame.Sum("genWeight").GetValue()
+    analyzer.Cut("Eff_L_{0}_cut".format(jetCat),"pnet0>{0} && pnet0<{1} && jetCat=={2}".format(wpL,wpT,jetCat))
+    nL   = analyzer.DataFrame.Sum("genWeight").GetValue()
+    analyzer.SetActiveNode(beforeNode)
+    analyzer.Cut("Eff_T_{0}_cut".format(jetCat),"pnet0>{0} && jetCat=={1}".format(wpT,jetCat))
+    nT   = analyzer.DataFrame.Sum("genWeight").GetValue()
+    effL = nL/(nTot+0.000001)#Avoid division by zero
+    effT = nT/(nTot+0.000001)
+    analyzer.SetActiveNode(beforeNode)
+    return effL, effT
+
+
+def getNCut(analyzer,cut,cutName):
+    beforeNode = analyzer.GetActiveNode()
+    a.Cut(cutName,cut)
+    nCut = analyzer.DataFrame.Sum("genWeight").GetValue()
+    analyzer.SetActiveNode(beforeNode)
+    return nCut
+
 parser = OptionParser()
 
 parser.add_option('-i', '--input', metavar='IFILE', type='string', action='store',
@@ -161,7 +183,33 @@ if(variation=="nom" and ("ZJets" in options.process or "WJets" in options.proces
     histos.extend([hHT,hpT,hVpT,hMSD])
 
 
-regionDefs = [("T","pnet0>{0}".format(pnetT)),("L","pnet0>{0} && pnet0<{1}".format(pnetL,pnetT)),("F","pnet0<{0}".format(pnetL))]
+
+CompileCpp('TIMBER/Framework/ZbbSF/btagSFHandler.cc')
+if(variation=="pnetUp"):
+    pnetVar=2
+elif(variation=="pnetDown"):
+    pnetVar=1
+else:
+    pnetVar = 0
+
+CompileCpp('btagSFHandler btagHandler = btagSFHandler({%f,%f},%s,%i);' %(pnetL,pnetT,year,pnetVar))#wps, year, var
+a.Define("TaggerCat","btagHandler.createTaggingCategories(pnet0)")
+
+if("ZJets" in options.process):
+    #Only apply SF to Z jets (Z->bb and Z->cc)
+    eff_bb_L, eff_bb_T = getTaggingEfficiencies(a,pnetL,pnetT,jetCat=3)#calculate efficiencies for Z->bb
+    eff_cc_L, eff_cc_T = getTaggingEfficiencies(a,pnetL,pnetT,jetCat=2)#calculate efficiencies for Z->cc
+    print("ParticleNet (L,T) bb-efficiencies: ({0:.2f},{1:.2f})".format(eff_bb_L,eff_bb_T))
+    print("ParticleNet (L,T) cc-mistag: ({0:.2f},{1:.2f})".format(eff_cc_L,eff_cc_T))
+
+    a.Define("eff_L","jetCat==3 ? {0} : {1}".format(eff_bb_L,eff_cc_L))
+    a.Define("eff_T","jetCat==3 ? {0} : {1}".format(eff_bb_T,eff_cc_T))
+    a.Define("jetFlav","jetCat+2")
+    a.Define("scaledPnet","btagHandler.updateTaggingCategories(TaggerCat,FatJet_pt0,jetFlav,{float(eff_L),float(eff_T)})")
+else:
+    a.Define("scaledPnet","TaggerCat")
+
+regionDefs = [("T","scaledPnet==2"),("L","scaledPnet==1"),("F","scaledPnet==0"),("I","pnet0>-1")]
 regionYields = {}
 
 for region,cut in regionDefs:

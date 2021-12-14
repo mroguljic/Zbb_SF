@@ -19,10 +19,12 @@ wpL = 0.94
 wpT = 0.98
 
 
-variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown","ptRwtUp","ptRwtDown","puRwtUp","puRwtDown"]
-varsFromNomTree = ["ptRwtUp","ptRwtDown","puRwtUp","puRwtDown"]
+variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown","ptRwtUp","ptRwtDown","puRwtUp","puRwtDown","pnetUp","pnetDown"]
+varsFromNomTree = ["ptRwtUp","ptRwtDown","puRwtUp","puRwtDown","pnetUp","pnetDown"]
 for variation in variations:
     if("ptRwt" in variation and "TTbar" not in sample):
+        continue
+    if("pnet" in variation and "ZJets" not in sample):
         continue
     if(variation!="nom" and ("QCD" in sample or "JetHT" in sample)):
         continue           
