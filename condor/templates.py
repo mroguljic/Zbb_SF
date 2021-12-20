@@ -30,6 +30,8 @@ python $WORK_DIR/eventSelection.py $* --var jmsDown
 python $WORK_DIR/eventSelection.py $* --var jmsUp
 python $WORK_DIR/eventSelection.py $* --var jmrDown
 python $WORK_DIR/eventSelection.py $* --var jmrUp
+python $WORK_DIR/eventSelection.py $* --var jmsPtDown
+python $WORK_DIR/eventSelection.py $* --var jmsPtUp
 '''
 
 selection_template_data='''#!/bin/bash
