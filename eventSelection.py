@@ -49,7 +49,7 @@ CompileCpp("TIMBER/Framework/helperFunctions.cc")
 CompileCpp("TIMBER/Framework/TTstitching.cc") 
 CompileCpp("TIMBER/Framework/SemileptonicFunctions.cc") 
 #CompileCpp("TIMBER/Framework/semiResolvedFunctions.cc") 
-CompileCpp("TIMBER/Framework/src/JMSUncShifter.cc") 
+CompileCpp("TIMBER/Framework/ZbbSF/JMSUncShifter.cc") 
 CompileCpp("TIMBER/Framework/ZbbSF/Zbb_Functions.cc") 
 CompileCpp("JMSUncShifter jmsShifter = JMSUncShifter();") 
 CompileCpp("TIMBER/Framework/src/JMRUncSmearer.cc") 
@@ -201,9 +201,9 @@ a.Cut("Eta","abs(FatJet_eta[0])<{0} && abs(FatJet_eta[1])<{0}".format(eta_cut))
 nEta = getNweighted(a,isData)
 
 
-if(varName=="jmsUp"):
+if(varName=="jmsUp" or varName=="jmsPtUp"):
     msdShift = 2
-elif(varName=="jmsDown"):
+elif(varName=="jmsDown" or varName=="jmsPtDown"):
     msdShift = 1
 else:
     msdShift = 0
@@ -216,12 +216,7 @@ else:
     msdSmear = 0
 
 evtColumns = VarGroup("Event columns")
-if isData:
-    evtColumns.Add("mSD",'FatJet_msoftdrop[0]')
-else:
-    smearString1 = "scaledMSD,1.1,nGenJetAK8,GenJetAK8_mass,FatJet_genJetAK8Idx[0],{0}".format(msdSmear)
-    evtColumns.Add("scaledMSD",'jmsShifter.shiftMsd(FatJet_msoftdrop[0],"%s",%i)' %(year, msdShift))
-    evtColumns.Add("mSD",'jmrSmearer.smearMsd(%s)'%(smearString1))
+
 
 evtColumns.Add("FatJet_pt0","{0}[0]".format(ptVar))
 evtColumns.Add("FatJet_pt1","{0}[1]".format(ptVar))
@@ -234,6 +229,17 @@ evtColumns.Add("nMu","nMuons(nMuon,Muon_looseId,Muon_pfIsoId,0,Muon_pt,20,Muon_e
 #1=PFIsoVeryLoose, 2=PFIsoLoose, 3=PFIsoMedium, 4=PFIsoTight, 5=PFIsoVeryTight, 6=PFIsoVeryVeryTight
 #condition is, pfIsoId>cut
 
+
+if isData:
+    evtColumns.Add("mSD",'FatJet_msoftdrop[0]')
+else:
+    if("jmsPt" in varName):
+        evtColumns.Add("scaledMSD",'jmsShifter.ptDependentJMS(FatJet_msoftdrop[0],FatJet_pt0,%i)' %(msdShift))
+    else:
+        evtColumns.Add("scaledMSD",'jmsShifter.shiftMsd(FatJet_msoftdrop[0],"%s",%i)' %(year, msdShift))
+
+    smearString = "scaledMSD,1.1,nGenJetAK8,GenJetAK8_mass,FatJet_genJetAK8Idx[0],{0}".format(msdSmear)
+    evtColumns.Add("mSD",'jmrSmearer.smearMsd(%s)'%(smearString))
 
 #b-tag reshaping
 if(varName == "sfDown"):
