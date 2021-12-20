@@ -15,7 +15,7 @@ def getNweighted(analyzer,isData):
         nWeighted = analyzer.DataFrame.Count().GetValue()
     return nWeighted
 
-def separateVHistos(analyzer,process,region):
+def separateVHistos(analyzer,process,region,nomTreeFlag):
     cats = {
     "light" : "jetCat==1",
     "c"     : "jetCat==2",
@@ -23,17 +23,26 @@ def separateVHistos(analyzer,process,region):
     "unm"   : "jetCat==0"}
 
     separatedHistos = []
+    separatedGroups = []
     beforeNode = analyzer.GetActiveNode()
     for cat in cats:
         analyzer.SetActiveNode(beforeNode)
         analyzer.Cut("{0}_{1}_{2}_cut".format(process,cat,region),"{0}".format(cats[cat]))
-        hist = a.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
-        hVpt = a.DataFrame.Histo1D(('{0}_{1}_VpT_{2}'.format(process,cat,region),';V pT [GeV];;',200,0,2000),"genVpt","evtWeight")
 
-        separatedHistos.append(hist)
+        if nomTreeFlag:
+            tplHist   = r.TH2F('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000)
+            templates = a.MakeTemplateHistos(tplHist,["mSD","FatJet_pt0"])
+            separatedGroups.append(templates)
+        else:
+            #For jms/jmr/jes/jer trees, we don't need to calculate uncertainties on nominal trees
+            hist = a.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","weight__nominal")
+            separatedHistos.append(hist)
+
+        hVpt = a.DataFrame.Histo1D(('{0}_{1}_VpT_{2}'.format(process,cat,region),';V pT [GeV];;',200,0,2000),"genVpt","weight__nominal")
         separatedHistos.append(hVpt)
+
     analyzer.SetActiveNode(beforeNode)
-    return separatedHistos
+    return separatedHistos,separatedGroups
 
 def getTaggingEfficiencies(analyzer,wpL,wpT,jetCat=3):
     beforeNode = analyzer.GetActiveNode()
@@ -92,6 +101,7 @@ parser.add_option('-w', '--wp', metavar='working points',nargs=2, action="store"
 (options, args) = parser.parse_args()
 variation = options.variation
 iFile = options.input
+
 if not variation in iFile:
     if("je" in variation or "jm" in variation):
         iFile = iFile.replace(".root","_{0}.root".format(variation))
@@ -100,88 +110,86 @@ if not variation in iFile:
         if not("nom" in iFile):
             iFile = iFile.replace(".root","_nom.root")
 
+
+if "nom" in iFile and "pnet" not in variation:
+    #Pnet variations have to be ran on nominal trees, but no need to calculate all unc. on nom trees
+    nomTreeFlag = True
+else:
+    nomTreeFlag = False
+
 a = analyzer(iFile)
 pnetT   = options.wps[1]
 pnetL   = options.wps[0]
 year    = options.year
 histos=[]
+histGroups=[]
 
 if("data" in options.process.lower() or "jetht" in options.process.lower()):
     isData=True
 else:
     isData=False
 
-if not isData:
-    trigFile   = "data/trig_eff_2016.root"
-    a.Define("pt_for_trig","TMath::Min(Double_t(FatJet_pt0),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)
-    triggerCorr = Correction('triggerCorrection',"TIMBER/Framework/src/EffLoader.cc",constructor=['"{0}"'.format(trigFile),'"trig_eff"'],corrtype='weight')
-    a.AddCorrection(triggerCorr, evalArgs={'xval':'pt_for_trig','yval':0,'zval':0})
-    puCorr      = Correction('puReweighting',"TIMBER/Framework/src/puWeight.cc",constructor=['"../TIMBER/TIMBER/data/pileup/PUweights_{0}.root"'.format(year)],corrtype='weight')
-    a.AddCorrection(puCorr, evalArgs={'puTrue':'Pileup_nTrueInt'})
-    if("TTbar" in options.process):
-        ptrwtCorr = Correction('topPtReweighting',"TIMBER/Framework/src/TopPt_reweighting.cc",corrtype='weight')
-        a.AddCorrection(ptrwtCorr, evalArgs={'genTPt':'topPt','genTbarPt':'antitopPt'})
-    if("WJets" in options.process):
-        qcdName = "QCD_W_16"
-        ewkName = "EWK_W"
-    if("ZJets" in options.process):
-        qcdName = "QCD_Z_16"
-        ewkName = "EWK_Z"
-    if("WJets" in options.process or "ZJets" in options.process):
-        NLOfile = "data/NLO_corrections.root"
-        a.Define("genVpt_rescaled","TMath::Max(300.,TMath::Min(Double_t(genVpt),3000.))")#Weights applied in 300-3000 GeV gen V pt range
-        NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='weight')
-        NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='weight')
-        a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
-        a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
-
-
 
 if isData:
     a.Define("genWeight","1")
+genWCorr    = Correction('genW',"TIMBER/Framework/ZbbSF/BranchCorrection.cc",corrtype='corr')
+a.AddCorrection(genWCorr, evalArgs={'val':'genWeight'})
 
+if not isData:
+    trigFile   = "data/trig_eff_2016.root"
+    a.Define("pt_for_trig","TMath::Min(Double_t(FatJet_pt0),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)
+    triggerCorr = Correction('trig',"TIMBER/Framework/src/EffLoader.cc",constructor=['"{0}"'.format(trigFile),'"trig_eff"'],corrtype='weight')
+    a.AddCorrection(triggerCorr, evalArgs={'xval':'pt_for_trig','yval':0,'zval':0})
+    puCorr      = Correction('puRwt',"TIMBER/Framework/src/puWeight.cc",constructor=['"../TIMBER/TIMBER/data/pileup/PUweights_{0}.root"'.format(year)],corrtype='weight')
+    a.AddCorrection(puCorr, evalArgs={'puTrue':'Pileup_nTrueInt'})
+
+    if("TTbar" in options.process):
+        ptrwtCorr = Correction('ptRwt',"TIMBER/Framework/src/TopPt_reweighting.cc",corrtype='weight')
+        a.AddCorrection(ptrwtCorr, evalArgs={'genTPt':'topPt','genTbarPt':'antitopPt'})
+    if("WJets" in options.process):
+        qcdName     = "QCD_W_16"
+        ewkName     = "EWK_W_nominal"
+        uncPrefix   = "unc_EWK_W"
+        nloSyst     = ["d1K_NLO","d2K_NLO","d1kappa_EW","W_d2kappa_EW","W_d3kappa_EW"]
+    if("ZJets" in options.process):
+        qcdName     = "QCD_Z_16"
+        ewkName     = "EWK_Z_nominal"
+        uncPrefix   = "unc_EWK_Z"
+        nloSyst     = ["d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","Z_d2kappa_EW","Z_d3kappa_EW"]
+    if("WJets" in options.process or "ZJets" in options.process):
+        NLOfile     = "data/NLO_corrections.root"
+        a.Define("genVpt_rescaled","TMath::Max(300.,TMath::Min(Double_t(genVpt),3000.))")#Weights applied in 300-3000 GeV gen V pt range
+        NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='corr')
+        NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='corr')
+        a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+        a.AddCorrection(NLOewkCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
+
+        if nomTreeFlag:
+            for syst in nloSyst:
+                uncUp      = uncPrefix+"_"+syst+"_up"
+                uncDown    = uncPrefix+"_"+syst+"_down"
+                print(NLOfile,uncUp,uncDown)
+                nloSystUnc = Correction(syst,"TIMBER/Framework/ZbbSF/UncLoader.cc",constructor=['"{0}","{1}","{2}"'.format(NLOfile,uncUp,uncDown)],corrtype='uncert')
+                a.AddCorrection(nloSystUnc, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
 
 a.MakeWeightCols()
-weightString = "weight__nominal"
-if("trig" in variation):
-    if(variation=="trigUp"):
-        weightString = "weight__triggerCorrection_up"
-    if(variation=="trigDown"):
-        weightString = "weight__triggerCorrection_down"
-if("ptRwt" in variation):
-    if(variation=="ptRwtUp"):
-        weightString = "weight__topPtReweighting_up"
-    if(variation=="ptRwtDown"):
-        weightString = "weight__topPtReweighting_down"
-if("puRwt" in variation):
-    if(variation=="puRwtUp"):
-        weightString = "weight__puReweighting_up"
-    if(variation=="puRwtDown"):
-        weightString = "weight__puReweighting_down"
 
-if(year=="2018"):
-    weightString+="*HEMweight"
-
-a.Define("evtWeight","genWeight*{0}".format(weightString))
-
-
-if(variation=="nom" and ("ZJets" in options.process or "WJets" in options.process)):
-    a.MakeWeightCols('noKFactors',dropList=["qcd_nlo","ewk_nlo"])
-    a.Define("noKFactors_weight","genWeight*weight_noKFactors__nominal")
+# if(variation=="nom" and ("ZJets" in options.process or "WJets" in options.process)):
+#     a.MakeWeightCols('noKFactors',dropList=["qcd_nlo","ewk_nlo"])
+#     a.Define("noKFactors_weight","genWeight*weight_noKFactors__nominal")
     
-    hHTnoK  = a.DataFrame.Histo1D(('{0}_HT_noKFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","noKFactors_weight")
-    hpTnoK  = a.DataFrame.Histo1D(('{0}_pT_noKFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","noKFactors_weight")
-    hVpTnoK = a.DataFrame.Histo1D(('{0}_VpT_noKFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","noKFactors_weight")
-    hMSDnoK = a.DataFrame.Histo1D(('{0}_mSD_noKFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","noKFactors_weight")
+#     hHTnoK  = a.DataFrame.Histo1D(('{0}_HT_noKFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","noKFactors_weight")
+#     hpTnoK  = a.DataFrame.Histo1D(('{0}_pT_noKFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","noKFactors_weight")
+#     hVpTnoK = a.DataFrame.Histo1D(('{0}_VpT_noKFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","noKFactors_weight")
+#     hMSDnoK = a.DataFrame.Histo1D(('{0}_mSD_noKFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","noKFactors_weight")
 
-    hHT     = a.DataFrame.Histo1D(('{0}_HT_KFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","evtWeight")
-    hpT     = a.DataFrame.Histo1D(('{0}_pT_KFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","evtWeight")
-    hVpT    = a.DataFrame.Histo1D(('{0}_VpT_KFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","evtWeight")
-    hMSD    = a.DataFrame.Histo1D(('{0}_mSD_KFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","evtWeight")    
+#     hHT     = a.DataFrame.Histo1D(('{0}_HT_KFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","evtWeight")
+#     hpT     = a.DataFrame.Histo1D(('{0}_pT_KFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","evtWeight")
+#     hVpT    = a.DataFrame.Histo1D(('{0}_VpT_KFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","evtWeight")
+#     hMSD    = a.DataFrame.Histo1D(('{0}_mSD_KFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","evtWeight")    
 
-    histos.extend([hHTnoK,hpTnoK,hVpTnoK,hMSDnoK])
-    histos.extend([hHT,hpT,hVpT,hMSD])
-
+#     histos.extend([hHTnoK,hpTnoK,hVpTnoK,hMSDnoK])
+#     histos.extend([hHT,hpT,hVpT,hMSD])
 
 
 CompileCpp('TIMBER/Framework/ZbbSF/btagSFHandler.cc')
@@ -220,14 +228,25 @@ checkpoint = a.GetActiveNode()
 for region,cut in regionDefs:
     a.SetActiveNode(checkpoint)
     a.Cut("{0}_cut".format(region),cut)
+
     if("ZJets" in options.process or "WJets" in options.process):
-        categorizedHistos = separateVHistos(a,options.process,region)
+        categorizedHistos, categorizedGroups = separateVHistos(a,options.process,region,nomTreeFlag)
         histos.extend(categorizedHistos)
+        histGroups.extend(categorizedGroups)
+
     if("ZJets" in options.process or "WJets" in options.process):
         #For "inclusive flavour", still keep only jets matched to V
         a.Cut("{0}_matched_V_cut".format(region),"jetCat>0")
-    h2d = a.DataFrame.Histo2D(('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","evtWeight")
-    histos.append(h2d)
+
+    if nomTreeFlag:
+        tplHist   = r.TH2F('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000)
+        templates = a.MakeTemplateHistos(tplHist,["mSD","FatJet_pt0"])
+        histGroups.append(templates)
+    else:
+        #For jms/jmr/jes/jer trees, we don't need to calculate uncertainties on nominal trees
+        h2d = a.DataFrame.Histo2D(('{0}_m_pT_{1}'.format(options.process,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","weight__nominal")
+        histos.append(h2d)
+
     regionYields[region] = getNweighted(a,isData)
 
 #include histos from evt sel in the template file for nominal template
@@ -250,6 +269,10 @@ out_f.cd()
 for h in histos:
     h.SetName(h.GetName()+"_"+options.variation)
     h.Write()
+
+for hGroup in histGroups:
+    hGroup.Do("Write")
+
 out_f.Close()
 
 #a.PrintNodeTree('test.ps')
