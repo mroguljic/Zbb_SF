@@ -6,7 +6,7 @@ os.chdir(targetDir)
 
 directories=[d for d in os.listdir(os.getcwd()) if os.path.isdir(d)]
 
-variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown"]
+variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown","jmsPtUp","jmsPtDown"]
 
     
 for d in directories:
