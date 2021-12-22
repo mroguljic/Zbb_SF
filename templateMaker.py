@@ -20,6 +20,7 @@ def separateVHistos(analyzer,process,region,nomTreeFlag):
     "light" : "jetCat==1",
     "c"     : "jetCat==2",
     "b"     : "jetCat==3",
+    "bc"     : "jetCat==3 || jetCat==2",
     "unm"   : "jetCat==0"}
 
     separatedHistos = []
@@ -31,14 +32,14 @@ def separateVHistos(analyzer,process,region,nomTreeFlag):
 
         if nomTreeFlag:
             tplHist   = r.TH2F('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000)
-            templates = a.MakeTemplateHistos(tplHist,["mSD","FatJet_pt0"])
+            templates = analyzer.MakeTemplateHistos(tplHist,["mSD","FatJet_pt0"])
             separatedGroups.append(templates)
         else:
             #For jms/jmr/jes/jer trees, we don't need to calculate uncertainties on nominal trees
-            hist = a.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","weight__nominal")
+            hist = analyzer.DataFrame.Histo2D(('{0}_{1}_m_pT_{2}'.format(process,cat,region),';mSD [GeV];pT [GeV];',160,40,200,155,450,2000),"mSD","FatJet_pt0","weight__nominal")
             separatedHistos.append(hist)
 
-        hVpt = a.DataFrame.Histo1D(('{0}_{1}_VpT_{2}'.format(process,cat,region),';V pT [GeV];;',200,0,2000),"genVpt","weight__nominal")
+        hVpt = analyzer.DataFrame.Histo1D(('{0}_{1}_VpT_{2}'.format(process,cat,region),';V pT [GeV];;',200,0,2000),"genVpt","weight__nominal")
         separatedHistos.append(hVpt)
 
     analyzer.SetActiveNode(beforeNode)
@@ -46,7 +47,7 @@ def separateVHistos(analyzer,process,region,nomTreeFlag):
 
 def getTaggingEfficiencies(analyzer,wpL,wpT,jetCat=3):
     beforeNode = analyzer.GetActiveNode()
-    a.Cut("jetCat_{0}_forEff".format(jetCat),"jetCat=={0}".format(jetCat))
+    analyzer.Cut("jetCat_{0}_forEff".format(jetCat),"jetCat=={0}".format(jetCat))
     nTot = analyzer.DataFrame.Sum("genWeight").GetValue()
     analyzer.Cut("Eff_L_{0}_cut".format(jetCat),"pnet0>{0} && pnet0<{1} && jetCat=={2}".format(wpL,wpT,jetCat))
     nL   = analyzer.DataFrame.Sum("genWeight").GetValue()
@@ -61,7 +62,7 @@ def getTaggingEfficiencies(analyzer,wpL,wpT,jetCat=3):
 
 def getNCut(analyzer,cut,cutName):
     beforeNode = analyzer.GetActiveNode()
-    a.Cut(cutName,cut)
+    analyzer.Cut(cutName,cut)
     nCut = analyzer.DataFrame.Sum("genWeight").GetValue()
     analyzer.SetActiveNode(beforeNode)
     return nCut
@@ -174,23 +175,6 @@ if not isData:
 
 a.MakeWeightCols()
 
-# if(variation=="nom" and ("ZJets" in options.process or "WJets" in options.process)):
-#     a.MakeWeightCols('noKFactors',dropList=["qcd_nlo","ewk_nlo"])
-#     a.Define("noKFactors_weight","genWeight*weight_noKFactors__nominal")
-    
-#     hHTnoK  = a.DataFrame.Histo1D(('{0}_HT_noKFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","noKFactors_weight")
-#     hpTnoK  = a.DataFrame.Histo1D(('{0}_pT_noKFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","noKFactors_weight")
-#     hVpTnoK = a.DataFrame.Histo1D(('{0}_VpT_noKFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","noKFactors_weight")
-#     hMSDnoK = a.DataFrame.Histo1D(('{0}_mSD_noKFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","noKFactors_weight")
-
-#     hHT     = a.DataFrame.Histo1D(('{0}_HT_KFactors'.format(options.process),';HT[GeV];;',200,0,2000.),"LHE_HT","evtWeight")
-#     hpT     = a.DataFrame.Histo1D(('{0}_pT_KFactors'.format(options.process),';pT[GeV];;',200,0,2000.),"FatJet_pt0","evtWeight")
-#     hVpT    = a.DataFrame.Histo1D(('{0}_VpT_KFactors'.format(options.process),';Gen VpT[GeV];;',200,0,2000.),"genVpt","evtWeight")
-#     hMSD    = a.DataFrame.Histo1D(('{0}_mSD_KFactors'.format(options.process),';Leading jet M_{SD}[GeV];;',160,40,200.),"mSD","evtWeight")    
-
-#     histos.extend([hHTnoK,hpTnoK,hVpTnoK,hMSDnoK])
-#     histos.extend([hHT,hpT,hVpT,hMSD])
-
 
 CompileCpp('TIMBER/Framework/ZbbSF/btagSFHandler.cc')
 if(variation=="pnetUp"):
@@ -213,7 +197,8 @@ if("ZJets" in options.process):
     a.Define("eff_L","jetCat==3 ? {0} : {1}".format(eff_bb_L,eff_cc_L))
     a.Define("eff_T","jetCat==3 ? {0} : {1}".format(eff_bb_T,eff_cc_T))
     a.Define("jetFlav","jetCat+2")
-    a.Define("scaledPnet","btagHandler.updateTaggingCategories(TaggerCat,FatJet_pt0,jetFlav,{float(eff_L),float(eff_T)})")
+    #a.Define("scaledPnet","btagHandler.updateTaggingCategories(TaggerCat,FatJet_pt0,jetFlav,{float(eff_L),float(eff_T)})") #Uncomment if we want to apply btag SF
+    a.Define("scaledPnet","TaggerCat")#Don't apply btag sf
 else:
     a.Define("scaledPnet","TaggerCat")
 

@@ -117,23 +117,23 @@ def lumiNormalization():
 
 def getPtRwtScaling(inputFile):
     f           = r.TFile.Open(inputFile)
-    hBeforePt   = f.Get("TTbar_m_pT_T_ptRwtDown")
-    hBeforePt.Add(f.Get("TTbar_m_pT_L_ptRwtDown"))
-    hBeforePt.Add(f.Get("TTbar_m_pT_F_ptRwtDown"))
-    hAfterPt    = f.Get("TTbar_m_pT_T_nom")
-    hAfterPt.Add(f.Get("TTbar_m_pT_L_nom"))
-    hAfterPt.Add(f.Get("TTbar_m_pT_F_nom"))
+    hBeforePt   = f.Get("TTbar_m_pT_T__ptRwt_down")
+    hBeforePt.Add(f.Get("TTbar_m_pT_L__ptRwt_down"))
+    hBeforePt.Add(f.Get("TTbar_m_pT_F__ptRwt_down"))
+    hAfterPt    = f.Get("TTbar_m_pT_T__nominal")
+    hAfterPt.Add(f.Get("TTbar_m_pT_L__nominal"))
+    hAfterPt.Add(f.Get("TTbar_m_pT_F__nominal"))
     scale       = hBeforePt.Integral()/hAfterPt.Integral()
     return scale
 
 def getPtRwtUpScaling(inputFile):
     f           = r.TFile.Open(inputFile)
-    hBeforePt   = f.Get("TTbar_m_pT_T_ptRwtDown")
-    hBeforePt.Add(f.Get("TTbar_m_pT_L_ptRwtDown"))
-    hBeforePt.Add(f.Get("TTbar_m_pT_F_ptRwtDown"))
-    hAfterPt    = f.Get("TTbar_m_pT_T_ptRwtUp")
-    hAfterPt.Add(f.Get("TTbar_m_pT_L_ptRwtUp"))
-    hAfterPt.Add(f.Get("TTbar_m_pT_F_ptRwtUp"))
+    hBeforePt   = f.Get("TTbar_m_pT_T__ptRwt_down")
+    hBeforePt.Add(f.Get("TTbar_m_pT_L__ptRwt_down"))
+    hBeforePt.Add(f.Get("TTbar_m_pT_F__ptRwt_down"))
+    hAfterPt    = f.Get("TTbar_m_pT_T__ptRwt_up")
+    hAfterPt.Add(f.Get("TTbar_m_pT_L__ptRwt_up"))
+    hAfterPt.Add(f.Get("TTbar_m_pT_F__ptRwt_up"))
     scale       = hBeforePt.Integral()/hAfterPt.Integral()
     return scale
 
