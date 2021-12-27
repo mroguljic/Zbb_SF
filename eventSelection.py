@@ -55,7 +55,6 @@ CompileCpp("JMSUncShifter jmsShifter = JMSUncShifter();")
 CompileCpp("TIMBER/Framework/src/JMRUncSmearer.cc") 
 CompileCpp("JMRUncSmearer jmrSmearer = JMRUncSmearer();") 
 
-
 varName = options.variation
 if(varName=="nom"):
     ptVar  = "FatJet_pt_nom"
@@ -376,6 +375,13 @@ if not isData:
         snapshotColumns.append("genVpt")
         snapshotColumns.append("LHE_HT")
         snapshotColumns.append("VmatchedFatJetIdx")
+
+        if(varName=="nom"):
+            lhaid = a.lhaid
+            CompileCpp("TIMBER/Framework/src/PDFweight_uncert.cc")
+            CompileCpp("PDFweight_uncert pdfUncHandler = PDFweight_uncert({0});".format(lhaid))
+            a.Define("pdfUnc","pdfUncHandler.eval(LHEPdfWeight)")
+            snapshotColumns.append("pdfUnc")
 
 if(year=="2018"):
     snapshotColumns.append("HEMweight")
