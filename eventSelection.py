@@ -145,7 +145,7 @@ if(year=="2016"):
         "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50","HLT_PFHT800","HLT_PFHT900","HLT_AK8PFJet360_TrimMass30","HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV_p20","HLT_AK8PFJet450"]
 elif(year=="2017"):
     triggerList=["HLT_PFHT1050","HLT_AK8PFJet400_TrimMass30","HLT_AK8PFJet420_TrimMass30","HLT_AK8PFHT800_TrimMass50",
-"HLT_PFJet500","HLT_PFJet320","HLT_AK8PFJet500","HLT_AK8PFJet320"]
+"HLT_PFJet500","HLT_AK8PFJet500"]
 elif(year=="2018"):
    triggerList=["HLT_PFHT1050","HLT_AK8PFJet400_TrimMass30","HLT_AK8PFJet420_TrimMass30","HLT_AK8PFHT800_TrimMass50",
 "HLT_PFJet500","HLT_AK8PFJet500"]
@@ -383,7 +383,7 @@ if not isData:
             a.Define("pdfUnc","pdfUncHandler.eval(LHEPdfWeight)")
             snapshotColumns.append("pdfUnc")
 
-if(year=="2018"):
+if(year=="2018" and not isData):
     snapshotColumns.append("HEMweight")
 
 opts = ROOT.RDF.RSnapshotOptions()
