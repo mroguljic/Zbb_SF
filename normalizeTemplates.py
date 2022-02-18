@@ -58,18 +58,17 @@ def mergeSamples(inFiles,outFile,regexMatch,regexReplace):
     f.Close()
     print("\n")
 
-def lumiNormalization():
+def lumiNormalization(wp=0.98):
 
     processes16 = ["QCD500","QCD700","QCD1000","QCD1500","QCD2000","TTbar","TTbarSemi","TTbarHT","ST_top","ST_antitop","ST_tW_top"
     ,"ST_tW_antitop","ST_sChannel","WJets400","WJets600","WJets800","ZJets400","ZJets600","ZJets800"]
-    processes17 = ["QCD500","QCD700","QCD1000","QCD1500","QCD2000","TTbar","TTbarSemi","TTbarMtt700","TTbarMtt1000","ST_top","ST_antitop",
-    "ST_tW_top","ST_tW_antitop","ST_sChannel","WJets400","WJets600","WJets800","ZJets400","ZJets600","ZJets800"]
+    processes17 = ["QCD500","QCD700","QCD1000","QCD1500","QCD2000","TTbar","TTbarSemi","TTbarMtt700","TTbarMtt1000",
+    "WJets400","WJets600","WJets800","ZJets400","ZJets600","ZJets800"]
     processes18 = processes17
-    #for year in ['2016','2017','2018']:
-    for year in ['2016']:
+    for year in ['2016','2017','2018']:
         print(year)
-        nonScaledDir = "results/templates/{0}/nonScaled/".format(year)
-        lumiScaledDir = "results/templates/{0}/scaled/".format(year)
+        nonScaledDir = "results/templates/{0}/{1}/nonScaled/".format(wp,year)
+        lumiScaledDir = "results/templates/{0}/{1}/scaled/".format(wp,year)
         if(year=='2016'):
             processes = processes16
         elif(year=='2017'):
@@ -178,7 +177,8 @@ def renormalizePtRwt(inputFile):
 
 if __name__ == '__main__':
 
-    lumiNormalization()
-    for year in ["16"]:
-        ttbarTpl = "results/templates/20{0}/scaled/TTbar{0}.root".format(year)
-        renormalizePtRwt(ttbarTpl)
+    lumiNormalization(wp=0.94)
+    lumiNormalization(wp=0.98)
+    # for year in ["16"]:
+    #     ttbarTpl = "results/templates/20{0}/scaled/TTbar{0}.root".format(year)
+    #     renormalizePtRwt(ttbarTpl)
