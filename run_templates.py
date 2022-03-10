@@ -16,7 +16,7 @@ if("2018" in iDir):
     year=2018
 
 
-variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown","jmsPtUp","jmsPtDown"]
+variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown"]
 for variation in variations:
     if("ptRwt" in variation and "TTbar" not in sample):
         continue

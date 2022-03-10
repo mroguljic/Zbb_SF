@@ -26,7 +26,7 @@
   "WJets_c": {
     "file": "results/templates/2016/scaled/WJets16.root",
     "color":"orange",
-    "label": "W+Jets c",
+    "label": "W+Jets cs",
     "order": 5
   },
   "WJets_light": {
