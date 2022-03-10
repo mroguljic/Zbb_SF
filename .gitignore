@@ -12,3 +12,4 @@ test*root
 testing.py
 *test*root
 plots/*
+misc/*

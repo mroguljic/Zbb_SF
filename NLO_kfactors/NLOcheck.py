@@ -56,7 +56,7 @@ def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
     plt.clf()
 
 
-corrFile    = r.TFile.Open("NLO_corrections_new.root")
+corrFile    = r.TFile.Open("NLO_corrections.root")
 shapesFile  = r.TFile.Open("NLOcheck.root")
 
 #Z+Jets corrections
@@ -79,29 +79,29 @@ for year in ["2016","2017","2018"]:
 
         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
-    #plotPts(ptLO,ptLOkFac,ptNLO,"{0}_Z.png".format(year),legendTitle=year)
-    getRatio(ptLOkFac,ptNLO,"residual_{0}".format(year))
+    plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_Z.png".format(year),legendTitle=year)
+    #getRatio(ptLOkFac,ptNLO,"residual_{0}".format(year))
 
 
 
 #W+Jets corrections
-# ptNLO       = shapesFile.Get("WJetsToLNu_2017_gen_V_pT")
-# ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
+ptNLO       = shapesFile.Get("WJetsToLNu_2017_gen_V_pT")
+ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
 
 
-# for year in ["2016","2017","2018"]:
-#     ptLO        = shapesFile.Get("WJets_{0}_gen_V_pT".format(year))
-#     ptLOkFac    = ptLO.Clone("WJets_{0}_gen_V_pT_corr".format(year))
+for year in ["2016","2017","2018"]:
+    ptLO        = shapesFile.Get("WJets_{0}_gen_V_pT".format(year))
+    ptLOkFac    = ptLO.Clone("WJets_{0}_gen_V_pT_corr".format(year))
 
-#     if(year=="2016"):
-#         corr        = corrFile.Get("QCD_W_16")
-#     else:
-#         corr        = corrFile.Get("QCD_W_17")
+    if(year=="2016"):
+        corr        = corrFile.Get("QCD_W_16")
+    else:
+        corr        = corrFile.Get("QCD_W_17")
 
-#     for i in range(1,ptLO.GetNbinsX()+1):
-#         pt          = ptLO.GetBinCenter(i)
-#         kFac        = corr.GetBinContent(corr.FindBin(pt))
+    for i in range(1,ptLO.GetNbinsX()+1):
+        pt          = ptLO.GetBinCenter(i)
+        kFac        = corr.GetBinContent(corr.FindBin(pt))
 
-#         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
+        ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
-#     plotPts(ptLO,ptLOkFac,ptNLO,"{0}_W.png".format(year),legendTitle=year)
+    plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_W.png".format(year),legendTitle=year)

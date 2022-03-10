@@ -149,7 +149,7 @@ with open("VJetsCorrections.json") as json_file:
     qcd_W_16    = corrections[4]
     qcd_W_17    = corrections[3]
 
-    outputFile = "NLO_corrections_new.root"
+    outputFile = "NLO_corrections.root"
 
     qcdToRoot(qcd_Z_16,"QCD_Z_16",outputFile)
     qcdToRoot(qcd_Z_17,"QCD_Z_17",outputFile)

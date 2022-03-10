@@ -146,7 +146,7 @@ if not isData:
         uncPrefix   = "unc_EWK_Z"
         nloSyst     = ["d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","Z_d2kappa_EW","Z_d3kappa_EW"]
     if("WJets" in options.process or "ZJets" in options.process):
-        NLOfile     = "data/NLO_corrections_extended.root"
+        NLOfile     = "data/NLO_corrections.root"
         a.Define("genVpt_rescaled","TMath::Max(200.,TMath::Min(Double_t(genVpt),3000.))")#Weights applied in 200-3000 GeV gen V pt range
         NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='corr')
         NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='corr')
