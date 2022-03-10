@@ -136,18 +136,24 @@ if not isData:
         ptrwtCorr = Correction('ptRwt',"TIMBER/Framework/src/TopPt_reweighting.cc",corrtype='weight')
         a.AddCorrection(ptrwtCorr, evalArgs={'genTPt':'topPt','genTbarPt':'antitopPt'})
     if("WJets" in options.process):
-        qcdName     = "QCD_W_{0}".format(year[2:])
+        if(year=="2016"):
+            qcdName = "QCD_W_16"#2016 has a different PYTHIA tune from 17/18 -> slightly different qcd k-factors
+        else:
+            qcdName = "QCD_W_17"
         ewkName     = "EWK_W_nominal"
         uncPrefix   = "unc_EWK_W"
         nloSyst     = ["d1K_NLO","d2K_NLO","d1kappa_EW","W_d2kappa_EW","W_d3kappa_EW"]
     if("ZJets" in options.process):
-        qcdName     = "QCD_Z_{0}".format(year[2:])
+        if(year=="2016"):
+            qcdName = "QCD_Z_16"
+        else:
+            qcdName = "QCD_Z_17"
         ewkName     = "EWK_Z_nominal"
         uncPrefix   = "unc_EWK_Z"
         nloSyst     = ["d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","Z_d2kappa_EW","Z_d3kappa_EW"]
     if("WJets" in options.process or "ZJets" in options.process):
         NLOfile     = "data/NLO_corrections.root"
-        a.Define("genVpt_rescaled","TMath::Max(200.,TMath::Min(Double_t(genVpt),3000.))")#Weights applied in 200-3000 GeV gen V pt range
+        a.Define("genVpt_rescaled","TMath::Max(200.,TMath::Min(Double_t(genVpt),1999.))")#Weights applied in 200-2000 GeV gen V pt range
         NLOqcdCorr = Correction('qcd_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,qcdName)],corrtype='corr')
         NLOewkCorr = Correction('ewk_nlo',"TIMBER/Framework/src/HistLoader.cc",constructor=['"{0}","{1}"'.format(NLOfile,ewkName)],corrtype='corr')
         a.AddCorrection(NLOqcdCorr, evalArgs={'xval':'genVpt_rescaled','yval':0,'zval':0})
