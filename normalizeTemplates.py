@@ -177,8 +177,8 @@ def renormalizePtRwt(inputFile):
 
 if __name__ == '__main__':
 
-    lumiNormalization(wp=0.94)
+    #lumiNormalization(wp=0.94)
     lumiNormalization(wp=0.98)
-    # for year in ["16"]:
-    #     ttbarTpl = "results/templates/20{0}/scaled/TTbar{0}.root".format(year)
-    #     renormalizePtRwt(ttbarTpl)
+    for year in ["16","17","18"]:
+        ttbarTpl = "results/templates/20{0}/scaled/TTbar{0}.root".format(year)
+        renormalizePtRwt(ttbarTpl)

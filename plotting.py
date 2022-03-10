@@ -63,7 +63,6 @@ def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=Tr
     labelsData = []
     data = sorted(data.items(), key=lambda x: x[1]["order"])#VERY HANDY, reads samples in order
     for sample, sample_cfg in data:
-        print(sample)
         tempFile = r.TFile.Open(sample_cfg["file"])
         if(proj=="X"):
             h = tempFile.Get("{0}_{1}".format(sample,var)).ProjectionX()
@@ -130,6 +129,7 @@ def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=Tr
 
     plt.savefig(outFile)
 
+    plt.cla()
     plt.clf()
 
 def getPoissonErrors(hist):
@@ -553,11 +553,76 @@ def plotVJetsInFit(postfitShapesFile,region,odir):
             plotLines(projections,labels,colors,"M_{SD} [GeV]",linestyles,"{0}/VJets_{1}_{2}.png".format(odir,region,i),xRange=[50,150],yRange=yRanges[i-1],projectionText=projectionText)
 
 if __name__ == '__main__':
+
+    for year in ["2016","2017","2018"]:
+        odir = "results/plots/{0}/".format(year)
+
+        if(year=="2016"):
+            luminosity="36.3"
+        elif(year=="2017"):
+            luminosity="41.5"
+        elif(year=="2018"):
+            luminosity="59.8"
+
+
+        with open("plotConfigs/hadronic{0}.json".format(year)) as json_file:
+            data = json.load(json_file)
+
+            plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_lin_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
+            plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_lin_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
+            plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_lin_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
+
+            plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_pT_lin_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+            plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_pT_lin_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+            plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_pT_lin_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+
+            plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
+            plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
+            plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_data.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
+
+
+            plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_pT_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+            plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_pT_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+            plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_pT_data.png".format(year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+
+
+            f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
+            print(data["data_obs"]["file"])
+            hTotal = f.Get("data_obs_pT0noTriggers_nom")
+            hPass  = f.Get("data_obs_pT0triggersAll_nom")
+            eff = r.TEfficiency(hPass,hTotal)
+            eff.SetName("trig_eff")
+            # g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
+            # g.cd()
+            # eff.Write()
+            # g.Close()
+
+            plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
+
+
+        with open("plotConfigs/Vjets{0}.json".format(year)) as json_file:
+            data = json.load(json_file)
+            plotVJets(data,"VpT_I_nom","plots/{0}/I_vpT_lin.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5000],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_F_nom","plots/{0}/F_vpT_lin.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5500],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_L_nom","plots/{0}/L_vpT_lin.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,100],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_T_nom","plots/{0}/T_vpT_lin.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_I_nom","plots/{0}/I_vpT.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_F_nom","plots/{0}/F_vpT.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_L_nom","plots/{0}/L_vpT.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**2],rebinX=1,luminosity=luminosity)
+            plotVJets(data,"VpT_T_nom","plots/{0}/T_vpT.png".format(year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
+
+
+            plotVJets(data,"m_pT_I__nominal","plots/{0}/I_mVJets_lin.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,3000],rebinX=1,luminosity=luminosity,proj="X")
+            plotVJets(data,"m_pT_F__nominal","plots/{0}/F_mVJets_lin.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,2500],rebinX=1,luminosity=luminosity,proj="X")
+            plotVJets(data,"m_pT_L__nominal","plots/{0}/L_mVJets_lin.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,70],rebinX=1,luminosity=luminosity,proj="X")
+            plotVJets(data,"m_pT_T__nominal","plots/{0}/T_mVJets_lin.png".format(year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,180],rebinX=1,luminosity=luminosity,proj="X")
+
+
+
     #Postfit
     cmsswArea       = "CMSSW_10_6_14/src/"
-    #for workingArea in ["SF16_T","SF17_T","SF18_T","SF16_L","SF17_L","SF18_L"]:
     for workingArea in ["SF16_T","SF17_T","SF18_T"]:
-        for polyOrder in ["1x1","1x2","2x2","2x1"]:
+        for polyOrder in ["1x2"]:
             baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
             fitFile         = baseDir+"postfitshapes_s.root"
             Path("plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
@@ -566,94 +631,7 @@ if __name__ == '__main__':
                 plotPostfit(fitFile,"fail","plots/{0}/{1}/".format(workingArea,polyOrder))
             except:
                 print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
-    # fitFile = "/afs/cern.ch/work/m/mrogulji/UL_X_YH/Zbb_SF/CMSSW_10_6_14/src/Zbbfit/2x2_area/postfitshapes_s.root"
-    # plotPostfit(fitFile,"T","plots/{0}/r_fit_FLT_2x2/")
-    # plotPostfit(fitFile,"L","plots/{0}/r_fit_FLT_2x2/")
-    # plotPostfit(fitFile,"F","plots/{0}/r_fit_FLT_2x2/")    
-    # plotPostfit(fitFile,"T","plots/{0}/r_fit_FLT_2x2/",prefitTag=True)
-    # plotPostfit(fitFile,"L","plots/{0}/r_fit_FLT_2x2/",prefitTag=True)
-    # plotPostfit(fitFile,"F","plots/{0}/r_fit_FLT_2x2/",prefitTag=True)
+
     #plotVJetsInFit(fitFile,"T","plots/{0}/r_fit/")
     #plotVJetsInFit(fitFile,"F","plots/{0}/r_fit/")
-
-
-    #Control vars
-    # parser = OptionParser()
-    # parser.add_option('-j', '--json', metavar='IFILE', type='string', action='store',
-    #             default   =   '',
-    #             dest      =   'json',
-    #             help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # parser.add_option('-y', '--year', metavar='IFILE', type='string', action='store',
-    #         default   =   '',
-    #         dest      =   'year',
-    #         help      =   'Json file containing names, paths to histograms, xsecs etc.')
-    # (options, args) = parser.parse_args()
-    # odir = "results/plots/{0}/".format(options.year)
-
-    # year = options.year
-    # if(year=="2016"):
-    #     luminosity="36.3"
-    # elif(year=="2017"):
-    #     luminosity="41.5"
-    # elif(year=="2018"):
-    #     luminosity="59.8"
-    # elif(year=="RunII"):
-    #     luminosity="138"
-    # else:
-    #     print("Year not specified")
-    #     luminosity="0"
-
-    # with open(options.json) as json_file:
-    #     data = json.load(json_file)
-
-    #     plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_lin_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
-    #     plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_lin_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
-    #     plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_lin_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity)
-
-    #     plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_pT_lin_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 5 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-    #     plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_pT_lin_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-    #     plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_pT_lin_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=False,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-
-    #     plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[1,10**5],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
-    #     plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[10,10**5],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
-    #     plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_data.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",yRange=[100,10**7],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity)
-
-
-    #     plotVarStack(data,"m_pT_T__nominal","plots/{0}/T_pT_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-    #     plotVarStack(data,"m_pT_L__nominal","plots/{0}/L_pT_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-    #     plotVarStack(data,"m_pT_F__nominal","plots/{0}/F_pT_data.png".format(options.year),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-
-
-    #     f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
-    #     print(data["data_obs"]["file"])
-    #     hTotal = f.Get("data_obs_pT0noTriggers_nom")
-    #     hPass  = f.Get("data_obs_pT0triggersAll_nom")
-    #     eff = r.TEfficiency(hPass,hTotal)
-    #     eff.SetName("trig_eff")
-    #     print(eff.GetName())
-    #     g   = r.TFile.Open("data/trig_eff_{0}.root".format(year),"RECREATE")
-    #     g.cd()
-    #     eff.Write()
-    #     g.Close()
-
-    #     plotTriggerEff(hPass,hTotal,year,luminosity,"plots/{0}/Trig_eff_{0}.png".format(year))
-
-
-
-        # plotVJets(data,"VpT_I__nominal","plots/{0}/I_vpT_lin.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5000],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_F__nominal","plots/{0}/F_vpT_lin.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5500],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_L__nominal","plots/{0}/L_vpT_lin.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,100],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_T__nominal","plots/{0}/T_vpT_lin.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_I__nominal","plots/{0}/I_vpT.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_F__nominal","plots/{0}/F_vpT.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_L__nominal","plots/{0}/L_vpT.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**2],rebinX=1,luminosity=luminosity)
-        # plotVJets(data,"VpT_T__nominal","plots/{0}/T_vpT.png".format(options.year),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
-
-
-        # plotVJets(data,"m_pT_I__nominal","plots/{0}/I_mVJets_lin.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,3000],rebinX=1,luminosity=luminosity,proj="X")
-        # plotVJets(data,"m_pT_F__nominal","plots/{0}/F_mVJets_lin.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,2500],rebinX=1,luminosity=luminosity,proj="X")
-        # plotVJets(data,"m_pT_L__nominal","plots/{0}/L_mVJets_lin.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,70],rebinX=1,luminosity=luminosity,proj="X")
-        # plotVJets(data,"m_pT_T__nominal","plots/{0}/T_mVJets_lin.png".format(options.year),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 1 GeV",log=False,xRange=[40,150],yRange=[0,180],rebinX=1,luminosity=luminosity,proj="X")
-
-
 

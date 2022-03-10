@@ -13,3 +13,6 @@ testing.py
 *test*root
 plots/*
 misc/*
+*log
+*out
+*err
