@@ -31,7 +31,8 @@ verbose         = False
 submit_cmds     = []
 interactive_cmds= []
 interactiveFlag = True #Whether to print commands to run interactively (true) or condor commands to rsb (false)
-variations   = ["nom","jerUp","jerDown","jesUp","jesDown","jmsUp","jmsDown","jmrUp","jmrDown"]
+variations   = ["nom","jerUp","jerDown","jesUp","jesDown","jmsUp","jmsDown","jmrUp","jmrDown","jmsPtUp","jmsPtDown"]
+fileAge      = 1000
 
 for sample in samples:
     print(sample)
@@ -55,7 +56,7 @@ for sample in samples:
             if(var!="nom" and ("QCD" in sample or "JetHT" in sample)):
                 continue
             tempFileName = outputFile.replace(".root","_{0}.root".format(var))
-            if(checkFile(tempFileName) and file_age(tempFileName)<10.):
+            if(checkFile(tempFileName) and file_age(tempFileName)<fileAge):
             #If files exists and younger than N days
                 if(verbose):
                     print("Found ", tempFileName)
