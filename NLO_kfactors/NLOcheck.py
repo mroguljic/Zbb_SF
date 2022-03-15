@@ -8,13 +8,6 @@ from root_numpy import hist2array
 
 matplotlib.use('Agg')
 
-def getRatio(ptLOkFac,ptNLO,rName):
-    ratio = ptNLO.Clone(rName)
-    ratio.Divide(ptLOkFac)
-    f = r.TFile.Open("test.root","UPDATE")
-    ratio.Write()
-    f.Close()
-
 def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
     plt.style.use([hep.style.CMS])
     LO, edges   = hist2array(LO,return_edges=True)
@@ -60,11 +53,10 @@ corrFile    = r.TFile.Open("NLO_corrections.root")
 shapesFile  = r.TFile.Open("NLOcheck.root")
 
 #Z+Jets corrections
-ptNLO       = shapesFile.Get("DYJetsToLL_2017_gen_V_pT")
-ptNLO.Scale(6.93)#BR(Z->qq)/BR(Z->ll)
+for year in ["2016","2017"]:
+    ptNLO       = shapesFile.Get("DYJetsToLL_{0}_gen_V_pT".format(year))
+    ptNLO.Scale(6.93)#BR(Z->qq)/BR(Z->ll)
 
-
-for year in ["2016","2017","2018"]:
     ptLO        = shapesFile.Get("ZJets_{0}_gen_V_pT".format(year))
     ptLOkFac    = ptLO.Clone("ZJets_{0}_gen_V_pT_corr".format(year))
 
@@ -80,16 +72,13 @@ for year in ["2016","2017","2018"]:
         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
     plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_Z.png".format(year),legendTitle=year)
-    #getRatio(ptLOkFac,ptNLO,"residual_{0}".format(year))
 
 
 
 #W+Jets corrections
-ptNLO       = shapesFile.Get("WJetsToLNu_2017_gen_V_pT")
-ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
-
-
-for year in ["2016","2017","2018"]:
+for year in ["2016","2017"]:
+    ptNLO       = shapesFile.Get("WJetsToLNu_{0}_gen_V_pT".format(year))
+    ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
     ptLO        = shapesFile.Get("WJets_{0}_gen_V_pT".format(year))
     ptLOkFac    = ptLO.Clone("WJets_{0}_gen_V_pT_corr".format(year))
 

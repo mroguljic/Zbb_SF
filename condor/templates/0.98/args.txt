@@ -16,3 +16,4 @@
 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2018/ WJets400 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/templates/0.98/2018/ 0.98
 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2018/ WJets600 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/templates/0.98/2018/ 0.98
 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2018/ WJets800 /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/templates/0.98/2018/ 0.98
+
