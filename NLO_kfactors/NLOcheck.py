@@ -8,6 +8,15 @@ from root_numpy import hist2array
 
 matplotlib.use('Agg')
 
+def multiplyCorrs(h1,h2):
+    #multiplies h1 with values of h2 evaluated at h1 bin center
+    for i in range(1,h1.GetNbinsX()+1):
+        binCoord = h1.GetXaxis().GetBinCenter(i)
+        h2Val    = h2.GetBinContent(h2.FindBin(binCoord))
+        newVal   = h1.GetBinContent(i)*h2Val
+        h1.SetBinContent(i,newVal)
+    return h1
+
 def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
     plt.style.use([hep.style.CMS])
     LO, edges   = hist2array(LO,return_edges=True)
@@ -22,8 +31,8 @@ def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
 
     hep.histplot(histos,edges[0],stack=False,label=labels,linewidth=2,histtype="step")
 
-    hep.cms.lumitext(text="1 $fb^{-1}$ (13 TeV)")
-    hep.cms.text("WiP",loc=0)
+    hep.cms.lumitext(text="1 $fb^{-1}$ (13 TeV)",fontsize=25)
+    hep.cms.text("Simulation Work in progress",loc=0,fontsize=25)
     plt.tight_layout()
     plt.legend(loc="best",title=legendTitle)
     axs[0].set_yscale("log")
@@ -45,9 +54,72 @@ def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
     hep.histplot([ratiosBefore,ratiosAfter],edges[0],histtype="step",linewidth=2)
     print("Saving ", outputFile)
     plt.savefig(outputFile)
+    plt.savefig(outputFile.replace(".png",".pdf"))
 
     plt.clf()
 
+def plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,outputFile,year=2016):
+    plt.style.use([hep.style.CMS])
+    corr, edgesCorr = hist2array(corr,return_edges=True)
+    d1KUp,edgesUnc  = hist2array(d1KUp,return_edges=True)
+    d2KUp           = hist2array(d2KUp,return_edges=False)
+    d1KDn           = hist2array(d1KDn,return_edges=False)
+    d2KDn           = hist2array(d2KDn,return_edges=False)
+
+    f, ax      = plt.subplots()
+    histos     = [d1KUp,d2KUp,d1KDn,d2KDn]
+    labels     = ["d1K Unc","d2K Unc","_nolegend_","_nolegend_"]
+    linestyles = ["--",":","--",":"]
+    colors     = ["red","green","red","green"]
+    hep.histplot(corr,edgesCorr[0],stack=False,label=["{0} NLO QCD correction".format(year)],linewidth=2,histtype="step",linestyle=["-"],color=["black"])
+    hep.histplot(histos,edgesUnc[0],stack=False,label=labels,linewidth=2,histtype="step",linestyle=linestyles,color=colors)
+
+    hep.cms.lumitext(text="(13 TeV)")
+    hep.cms.text("Simulation Work in progress",loc=0)
+    plt.legend(loc="best",title=year)
+    ax.set_yscale("linear")
+    ax.set_xlim([200,2000])
+    ax.set_ylim([0,None])
+    ax.set_ylabel("Correction value",horizontalalignment='right', y=1.0)
+    ax.set_xlabel("Generator V pT [GeV]",horizontalalignment='right', x=1.0)
+
+    print("Saving ", outputFile)
+    plt.tight_layout()
+    plt.savefig(outputFile)
+    plt.savefig(outputFile.replace(".png",".pdf"))
+    plt.clf()
+
+def plotEWKCorr(corr,d1KUp,d2KUp,d3KUp,d1KDn,d2KDn,d3KDn,outputFile):
+    plt.style.use([hep.style.CMS])
+    corr, edges     = hist2array(corr,return_edges=True)
+    d1KUp           = hist2array(d1KUp,return_edges=False)
+    d2KUp           = hist2array(d2KUp,return_edges=False)
+    d3KUp           = hist2array(d3KUp,return_edges=False)
+    d1KDn           = hist2array(d1KDn,return_edges=False)
+    d2KDn           = hist2array(d2KDn,return_edges=False)
+    d3KDn           = hist2array(d3KDn,return_edges=False)
+
+    f, ax      = plt.subplots()
+    histos     = [corr,d1KUp,d2KUp,d3KUp,d1KDn,d2KDn,d3KDn]
+    labels     = ["NLO EWK correction","d1kappa Unc","d2kappa Unc","d3kappa Unc","_nolegend_","_nolegend_","_nolegend_"]
+    linestyles = ["-","--",":","-.","--",":","-."]
+    colors     = ["black","red","green","blue","red","green","blue"]
+    hep.histplot(histos,edges[0],stack=False,label=labels,linewidth=2,histtype="step",linestyle=linestyles,color=colors)
+
+    hep.cms.lumitext(text="(13 TeV)")
+    hep.cms.text("Simulation Work in progress",loc=0)
+    plt.legend(loc="best")
+    ax.set_yscale("linear")
+    ax.set_xlim([200,2000])
+    ax.set_ylim([0,None])
+    ax.set_ylabel("Correction value",horizontalalignment='right', y=1.0)
+    ax.set_xlabel("Generator V pT [GeV]",horizontalalignment='right', x=1.0)
+
+    print("Saving ", outputFile)
+    plt.tight_layout()
+    plt.savefig(outputFile)
+    plt.savefig(outputFile.replace(".png",".pdf"))
+    plt.clf()
 
 corrFile    = r.TFile.Open("NLO_corrections.root")
 shapesFile  = r.TFile.Open("NLOcheck.root")
@@ -75,7 +147,7 @@ for year in ["2016","2017"]:
 
 
 
-#W+Jets corrections
+# #W+Jets corrections
 for year in ["2016","2017"]:
     ptNLO       = shapesFile.Get("WJetsToLNu_{0}_gen_V_pT".format(year))
     ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
@@ -94,3 +166,45 @@ for year in ["2016","2017"]:
         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
     plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_W.png".format(year),legendTitle=year)
+
+
+#NLO QCD corr with unc
+for year in ["2016","2017"]:
+    corrFile    = r.TFile.Open("NLO_corrections.root")
+    for V in ["Z","W"]:
+        if(year=="2016"):
+            corr        = corrFile.Get("QCD_{0}_16".format(V))
+        else:
+            corr        = corrFile.Get("QCD_{0}_17".format(V))
+
+        ewkNom = corrFile.Get("EWK_{0}_nominal".format(V))
+        d1KUp  = corrFile.Get("EWK_{0}_d1K_NLO_up".format(V))
+        d2KUp  = corrFile.Get("EWK_{0}_d2K_NLO_up".format(V))
+        d1KDn  = corrFile.Get("EWK_{0}_d1K_NLO_down".format(V))
+        d2KDn  = corrFile.Get("EWK_{0}_d2K_NLO_down".format(V))
+
+        d1KUp.Divide(ewkNom)
+        d2KUp.Divide(ewkNom)
+        d1KDn.Divide(ewkNom)
+        d2KDn.Divide(ewkNom)
+
+        d1KUp = multiplyCorrs(d1KUp,corr)
+        d2KUp = multiplyCorrs(d2KUp,corr)
+        d1KDn = multiplyCorrs(d1KDn,corr)
+        d2KDn = multiplyCorrs(d2KDn,corr)
+
+        plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,"plots/{0}_{1}_QCDcorrection.png".format(year,V),year=year)
+    corrFile.Close()
+
+#NLO EWK corr with unc
+corrFile    = r.TFile.Open("NLO_corrections.root")
+for V in ["Z","W"]:
+    corr   = corrFile.Get("EWK_{0}_nominal".format(V))
+    d1KUp  = corrFile.Get("EWK_{0}_d1kappa_EW_up".format(V))
+    d2KUp  = corrFile.Get("EWK_{0}_{0}_d2kappa_EW_up".format(V))
+    d3KUp  = corrFile.Get("EWK_{0}_{0}_d3kappa_EW_up".format(V))
+    d1KDn  = corrFile.Get("EWK_{0}_d1kappa_EW_down".format(V))
+    d2KDn  = corrFile.Get("EWK_{0}_{0}_d2kappa_EW_down".format(V))
+    d3KDn  = corrFile.Get("EWK_{0}_{0}_d3kappa_EW_down".format(V))
+
+    plotEWKCorr(corr,d1KUp,d2KUp,d3KUp,d1KDn,d2KDn,d3KDn,"plots/{0}_EWKcorrection.png".format(V))
