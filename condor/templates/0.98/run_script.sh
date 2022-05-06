@@ -1,10 +1,11 @@
 #!/bin/bash
-cd /afs/cern.ch/work/m/mrogulji/UL_X_YH/CMSSW_11_1_5/
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cd /users/mrogul/Work/CMSSW_11_1_4/
 eval `scramv1 runtime -sh`
-cd /afs/cern.ch/work/m/mrogulji/UL_X_YH/
+cd /users/mrogul/Work/
 source timber-env/bin/activate
 
-export WORK_DIR=/afs/cern.ch/work/m/mrogulji/UL_X_YH/Zbb_SF/
+export WORK_DIR=/users/mrogul/Work/Zbb_SF/
 cd $WORK_DIR
 
 echo run_templates.py $*

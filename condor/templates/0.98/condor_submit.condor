@@ -3,7 +3,6 @@ executable            = run_script.sh
 output                = output_$(Process).out
 error                 = output_$(Process).err
 log                   = output_$(Process).log
-+JobFlavour           = "longlunch"
 Arguments = "$(args)"
 use_x509userproxy = true
 Queue args from args.txt

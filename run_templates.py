@@ -1,7 +1,10 @@
 import os
 import sys
-from pathlib import Path
 
+def createDirIfNotExist(path):
+    if not os.path.exists(path):
+        print("CREATING DIR: ", path)
+        os.makedirs(path)
 
 iDir = sys.argv[1]
 sample = sys.argv[2]
@@ -18,11 +21,7 @@ if("2018" in iDir):
 
 variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown"]
 for variation in variations:
-    if("ptRwt" in variation and "TTbar" not in sample):
-        continue
-    if("pnet" in variation and "ZJets" not in sample):
-        continue
-    if(variation!="nom" and ("QCD" in sample or "JetHT" in sample)):
+    if(variation!="nom" and not ("ZJets" in sample or "WJets" in sample)):
         continue           
 
     inputTag = variation
@@ -30,8 +29,8 @@ for variation in variations:
     inputFile = "{0}/{1}_{2}.root".format(iDir,sample,inputTag)
     outputFile = os.path.join(outDir,"nonScaled/",sample)
     outputFile = outputFile+".root"
-    Path(outDir+"/nonScaled").mkdir(parents=True, exist_ok=True)
-    Path(outDir+"/scaled").mkdir(parents=True, exist_ok=True)
+    createDirIfNotExist(outDir+"/nonScaled")
+    createDirIfNotExist(outDir+"/scaled")
     if(variation=="nom"):
         mode="RECREATE"
     else:

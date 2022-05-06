@@ -1,14 +1,10 @@
-#2016
-python run_selection.py -c selection_configs/2016/selection_mc_2016.json -y 2016 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 10 -q longlunch
-python run_selection.py -c selection_configs/2016/selection_mc_2016_TTHT.json -y 2016 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 5 -q workday
-python run_selection.py -c selection_configs/2016/selection_data_2016.json -y 2016 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2016/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2016/ -n 100 -q longlunch
+python run_skim.py -c skim_configs/2016/data.json -y 2016 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9/2016/
+python run_skim.py -c skim_configs/2016/mc.json -y 2016 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9/2016/
+python run_skim.py -c skim_configs/2016APV/data.json -y 2016APV -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9/2016APV/
+python run_skim.py -c skim_configs/2016APV/mc.json -y 2016APV -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9/2016APV/
 
-
-#2017
-python run_selection.py -c selection_configs/2017/selection_mc_2017.json -y 2017 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2017/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2017/ -n 5 -q longlunch
-python run_selection.py -c selection_configs/2017/selection_data_2017.json -y 2017 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2017/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2017/ -n 10 -q longlunch
-
-#2018
-python run_selection.py -c selection_configs/2018/selection_mc_2018.json -y 2018 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2018/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2018/ -n 5 -q longlunch
-python run_selection.py -c selection_configs/2018/selection_data_2018.json -y 2018 -o /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/results/eventSelection/2018/ -j /afs/cern.ch/user/m/mrogulji/UL_X_YH/Zbb_SF/condor/selectionJobs/2018/ -n 10 -q longlunch
+python run_skim.py -c skim_configs/2017/data.json -y 2017 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9/2017/
+python run_skim.py -c skim_configs/2017/mc.json -y 2017 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9/2017/
+python run_skim.py -c skim_configs/2018/data.json -y 2018 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9/2018/
+python run_skim.py -c skim_configs/2018/mc.json -y 2018 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9/2018/ 
 

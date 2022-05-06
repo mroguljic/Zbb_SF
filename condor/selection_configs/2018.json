@@ -1,0 +1,56 @@
+{
+  "JetHT2018A": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/JetHT2018A/"
+  },
+  "JetHT2018B": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/JetHT2018B/"
+  },
+  "JetHT2018C": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/JetHT2018C/"
+  },
+  "JetHT2018D": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/JetHT2018D/"
+  },
+  "ZJets400": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/ZJets400"
+  },
+  "ZJets600": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/ZJets600"
+  },
+  "ZJets800": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/ZJets800"
+  },
+  "WJets400": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/WJets400"
+  },
+  "WJets600": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/WJets600"
+  },
+  "WJets800": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/WJets800"
+  },
+  "TTbarHadronic": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/TTbarHadronic"
+  },  
+  "TTbarSemileptonic": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/TTbarSemileptonic"
+  },
+  "TTbarMtt700": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/TTbarMtt700"
+  },
+  "TTbarMtt1000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/TTbarMtt1000"
+  },
+  "QCD700": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/QCD700"
+  },
+  "QCD1000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/QCD1000"
+  }, 
+  "QCD1500": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/QCD1500"
+  },  
+  "QCD2000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2018/QCD2000"
+  } 
+}

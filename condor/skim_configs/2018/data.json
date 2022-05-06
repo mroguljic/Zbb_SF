@@ -1,0 +1,14 @@
+{
+  "JetHT2018A": {
+    "dataset":"/JetHT/Run2018A-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+  },
+  "JetHT2018B": {
+    "dataset":"/JetHT/Run2018B-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+  },
+  "JetHT2018C": {
+    "dataset":"/JetHT/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD"
+  },
+  "JetHT2018D": {
+    "dataset":"/JetHT/Run2018D-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD"
+  }
+}

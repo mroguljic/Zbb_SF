@@ -16,3 +16,6 @@ misc/*
 *log
 *out
 *err
+condor/selection_jobs/
+condor/skim_jobs/
+*pyc
