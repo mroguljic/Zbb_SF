@@ -1,3 +1,6 @@
+NLO_kfactors/rootFiles/
+NLO_kfactors/input/
+NLO_kfactors/plots/
 condor/templates/*out
 condor/templates/*err
 condor/templates/*log

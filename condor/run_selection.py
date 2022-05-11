@@ -36,7 +36,7 @@ def checkIfAlreadyProcessed(fileBase,outDir,sample):
         varFlag = True
 
     if varFlag:
-        variations  = ["nom","jerUp","jerDown","jesUp","jesDown","jmsUp","jmsDown","jmrUp"]
+        variations  = ["nom","jerUp","jerDown","jesUp","jesDown","jmsUp","jmsDown","jmrUp","jmrDown"]
     else:
         variations  = ["nom"]
 
@@ -47,7 +47,7 @@ def checkIfAlreadyProcessed(fileBase,outDir,sample):
 
     return True
 
-def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=False):
+def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=False,submitFlag=False):
     submissionCmds     = []
     for sample, sample_cfg in config.items():
 
@@ -111,6 +111,8 @@ def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=Fa
     
     for cmd in submissionCmds:
         print(cmd)
+        if(submitFlag):
+            os.system(cmd)
 
     return len(submissionCmds)
 
@@ -140,6 +142,7 @@ def main():
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-y', '--year', help='Dataset year',default="2016")
+    parser.add_argument('-s', '--submit', help='Submit to condor',default=False)
     args        = parser.parse_args()
     year        = args.year
 
@@ -147,6 +150,8 @@ def main():
     outDir      = "/users/mrogul/Work/Zbb_SF/results/selection/{0}/".format(year)
     jobsDir     = "/users/mrogul/Work/Zbb_SF/condor/selection_jobs/{0}/".format(year)
     filesPerJob = 10
+
+    createDirIfNotExist(outDir)
 
     if os.listdir(outDir):
         print("Output directory {0} is not empty".format(outDir))
@@ -159,7 +164,7 @@ def main():
 
     with open(datasets) as config_file:
         config  = json.load(config_file)
-        nJobs   = create_jobs(config, year=year,out_dir=outDir,jobs_dir=jobsDir,nFiles=filesPerJob,checkInput=checkInputFlag)
+        nJobs   = create_jobs(config, year=year,out_dir=outDir,jobs_dir=jobsDir,nFiles=filesPerJob,checkInput=checkInputFlag,submitFlag=args.submit)
 
     if(nJobs==0):
         print("All files processed, hadding results")

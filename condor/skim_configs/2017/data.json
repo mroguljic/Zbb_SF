@@ -1,17 +1,17 @@
 {
-  "JetHT2018B": {
+  "JetHT2017B": {
     "dataset":"/JetHT/Run2017B-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
   },
-  "JetHT2018C": {
+  "JetHT2017C": {
     "dataset":"/JetHT/Run2017C-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
   },
-  "JetHT2018D": {
+  "JetHT2017D": {
     "dataset":"/JetHT/Run2017D-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
   },
-  "JetHT2018E": {
+  "JetHT2017E": {
     "dataset":"/JetHT/Run2017E-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
   },
-  "JetHT2018F": {
+  "JetHT2017F": {
     "dataset":"/JetHT/Run2017F-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
   }
 }

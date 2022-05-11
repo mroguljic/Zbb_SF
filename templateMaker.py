@@ -111,8 +111,8 @@ year    = options.year
 histos=[]
 histGroups=[]
 
-#massVar = "JetPnetMass"
-massVar = "JetSDMass"
+massVar = "JetPnetMass"
+#massVar = "JetSDMass"
 
 if("data" in options.process.lower() or "jetht" in options.process.lower()):
     print("Running on data")
@@ -147,18 +147,12 @@ if not isData:
     a.AddCorrection(triggerCorr, evalArgs={'xval':'pt_for_trig','yval':0,'zval':0})
 
     if("WJets" in options.process):
-        if(year=="2016"):
-            qcdName = "QCD_W_16"#2016 has a different PYTHIA tune from 17/18 -> slightly different qcd k-factors
-        else:
-            qcdName = "QCD_W_17"
+        qcdName = "QCD_W"
         ewkName     = "EWK_W_nominal"
         uncPrefix   = "unc_EWK_W"
         nloSyst     = ["d1K_NLO","d2K_NLO","d1kappa_EW","W_d2kappa_EW","W_d3kappa_EW"]
     if("ZJets" in options.process):
-        if(year=="2016"):
-            qcdName = "QCD_Z_16"
-        else:
-            qcdName = "QCD_Z_17"
+        qcdName = "QCD_Z"
         ewkName     = "EWK_Z_nominal"
         uncPrefix   = "unc_EWK_Z"
         nloSyst     = ["d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","Z_d2kappa_EW","Z_d3kappa_EW"]

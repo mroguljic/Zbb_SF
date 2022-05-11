@@ -1,0 +1,59 @@
+{
+  "JetHT2016APVver2B": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/JetHT2016APVver2B/"
+  },
+  "JetHT2016APVC": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/JetHT2016APVC/"
+  },
+  "JetHT2016APVD": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/JetHT2016APVD/"
+  },
+  "JetHT2016APVE": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/JetHT2016APVE/"
+  },
+  "JetHT2016APVF": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/JetHT2016APVF/"
+  },
+  "ZJets400": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/ZJets400"
+  },
+  "ZJets600": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/ZJets600"
+  },
+  "ZJets800": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/ZJets800"
+  },
+  "WJets400": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/WJets400"
+  },
+  "WJets600": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/WJets600"
+  },
+  "WJets800": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/WJets800"
+  },
+  "TTbarHadronic": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/TTbarHadronic"
+  },  
+  "TTbarSemileptonic": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/TTbarSemileptonic"
+  },
+  "TTbarMtt700": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/TTbarMtt700"
+  },
+  "TTbarMtt1000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/TTbarMtt1000"
+  },
+  "QCD700": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/QCD700"
+  },
+  "QCD1000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/QCD1000"
+  }, 
+  "QCD1500": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/QCD1500"
+  },  
+  "QCD2000": {
+    "dataset":"/STORE/matej/Zbb_skims/v9/2016APV/QCD2000"
+  } 
+}

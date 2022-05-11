@@ -1,8 +1,0 @@
-{
-  "TTbarHT": {
-    "maxEvents": -1,
-    "dataset":"/eos/cms/store/group/phys_b2g/XToHYTo4B/UL_skims/2016/TTbarHT",
-    "xsec": 687.1,
-    "color": 4
-  }
-}

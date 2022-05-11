@@ -28,6 +28,7 @@ python $WORK_DIR/eventSelection.py $* --var jerUp
 python $WORK_DIR/eventSelection.py $* --var jmsUp
 python $WORK_DIR/eventSelection.py $* --var jmsDown
 python $WORK_DIR/eventSelection.py $* --var jmrUp
+python $WORK_DIR/eventSelection.py $* --var jmrDown
 '''
 
 selection_template_data='''#!/bin/bash

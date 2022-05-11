@@ -91,20 +91,25 @@ def eventSelection(options):
 
     histos          = []
 
-    if("2016" in options.year):
-        deepJetM    = 0.3093
-    if(options.year=="2017"):
-        deepJetM    = 0.3040 
-    if(options.year=="2018"):
-        deepJetM    = 0.2783 
+    if(options.year=="2016APV"):
+       deepCsvM    = 0.6001
+    elif(options.year=="2016"):
+       deepCsvM    = 0.5847
+    elif(options.year=="2017"):
+       deepCsvM    = 0.4506
+    elif(options.year=="2018"):
+       deepCsvM    = 0.4168 
+    else:
+        print("Year not supported")
+        sys.exit()
     #------------------------------#
 
 
     #-------AK4 b-tag SF-----------#
     if not isData:
         CompileCpp('TIMBER/Framework/Zbb_modules/AK4Btag_SF.cc')
-        print('AK4Btag_SF ak4SF = AK4Btag_SF("{0}", "DeepJet", "reshaping");'.format(options.year))
-        CompileCpp('AK4Btag_SF ak4SF = AK4Btag_SF("{0}", "DeepJet", "reshaping");'.format(options.year))
+        print('AK4Btag_SF ak4SF = AK4Btag_SF("{0}", "DeepCSV", "reshaping");'.format(options.year))
+        CompileCpp('AK4Btag_SF ak4SF = AK4Btag_SF("{0}", "DeepCSV", "reshaping");'.format(options.year))
     #------------------------------#
 
 
@@ -118,14 +123,10 @@ def eventSelection(options):
     nSkimmed = getNweighted(a,isData)
 
     #-------MET filters------------#
-    #UPDATE MET FOR 2016
     MetFilters = ["Flag_BadPFMuonFilter","Flag_EcalDeadCellTriggerPrimitiveFilter","Flag_HBHENoiseIsoFilter","Flag_HBHENoiseFilter",
-    "Flag_globalSuperTightHalo2016Filter","Flag_goodVertices"]
-    if(isData):
-        MetFilters.append("Flag_eeBadScFilter")
-    if(year!="2016"):
+    "Flag_globalSuperTightHalo2016Filter","Flag_goodVertices","Flag_BadPFMuonDzFilter","Flag_eeBadScFilter","Flag_ecalBadCalibFilter"]
+    if(year=="2017" or year=="2018"):
         MetFilters.append("Flag_ecalBadCalibFilter")
-        MetFilters.append("Flag_eeBadScFilter")
     MetFiltersString = a.GetFlagString(MetFilters)
     if MetFiltersString:#RDF crashes if METstring is empty
         a.Cut("MET_Filters",MetFiltersString)
@@ -134,7 +135,7 @@ def eventSelection(options):
 
     #----------Triggers------------#
     beforeTrigCheckpoint    = a.GetActiveNode()
-    if(year=="2016"):
+    if(year=="2016" or year=="2016APV"):
         triggerList         = ["HLT_AK8DiPFJet280_200_TrimMass30","HLT_AK8PFHT650_TrimR0p1PT0p03Mass50",
             "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50","HLT_PFHT800","HLT_PFHT900","HLT_AK8PFJet360_TrimMass30","HLT_AK8PFJet450"]
     elif(year=="2017"):
@@ -201,14 +202,13 @@ def eventSelection(options):
         evtColumns.Add("btagDisc",'Jet_btagDeepB') 
     else:
         evtColumns.Add("btagDisc",'ak4SF.evalCollection(nJet,Jet_pt, Jet_eta, Jet_hadronFlavour,Jet_btagDeepB,{0})'.format(sfVar)) 
-    evtColumns.Add("topVetoFlag","topVeto(FatJet_eta0,FatJet_phi0,nJet,Jet_eta,{0},Jet_phi,Jet_pt,btagDisc,{1})".format(2.4,deepJetM))
+    evtColumns.Add("topVetoFlag","topVeto(FatJet_eta0,FatJet_phi0,nJet,Jet_eta,{0},Jet_phi,Jet_pt,btagDisc,{1})".format(2.4,deepCsvM))
 
     a.Apply([evtColumns])
 
     a.Cut("pT","FatJet_pt0>450")
     a.Cut("pT_subl","FatJet_pt1>200")
     npT = getNweighted(a,isData)
-
 
     a.Cut("JetPnetMassCut","JetPnetMass>40")
     nJetMass = getNweighted(a,isData)
@@ -295,7 +295,7 @@ def eventSelection(options):
         if year=="2018":
             snapshotColumns.append("HEM_drop__nom")
 
-        if year=="2016" or year=="2017":
+        if "2016" in year or "2017" in year:
             snapshotColumns.extend(['Prefire__nom','Prefire__up','Prefire__down'])
 
 
