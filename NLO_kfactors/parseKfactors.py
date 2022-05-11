@@ -142,20 +142,16 @@ def relativeUnc(outputFile):
 with open("VJetsCorrections.json") as json_file:
     data        = json.load(json_file)
     corrections = data["corrections"]
-    ewk_Z       = corrections[2]
-    ewk_W       = corrections[5]
-    qcd_Z_16    = corrections[1]
-    qcd_Z_17    = corrections[0]
-    qcd_W_16    = corrections[4]
-    qcd_W_17    = corrections[3]
+    ewk_Z       = corrections[1]
+    ewk_W       = corrections[3]
+    qcd_Z       = corrections[0]
+    qcd_W       = corrections[2]
 
     outputFile = "NLO_corrections.root"
 
-    qcdToRoot(qcd_Z_16,"QCD_Z_16",outputFile)
-    qcdToRoot(qcd_Z_17,"QCD_Z_17",outputFile)
+    qcdToRoot(qcd_Z,"QCD_Z",outputFile)
 
-    qcdToRoot(qcd_W_16,"QCD_W_16",outputFile)
-    qcdToRoot(qcd_W_17,"QCD_W_17",outputFile)
+    qcdToRoot(qcd_W,"QCD_W",outputFile)
 
     ewkToRootWithUncerts(ewk_Z,"EWK_Z",outputFile)
     ewkToRootWithUncerts(ewk_W,"EWK_W",outputFile)

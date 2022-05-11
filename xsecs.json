@@ -14,18 +14,6 @@
  "TTbarMtt700": {"xsec": 66.85},
  "TTbarMtt1000": {"xsec": 16.38},
  "TTbarSemileptonic": {"xsec": 365.34},
- "DY1JetsToLL150":{"xsec":9.543},
- "DY1JetsToLL250":{"xsec":1.097},
- "DY1JetsToLL400":{"xsec":0.1207},
- "DY2JetsToLL150":{"xsec":15.65},
- "DY2JetsToLL250":{"xsec":2.74},
- "DY2JetsToLL400":{"xsec":0.4492},
- "W1JetsToLNu150":{"xsec":71.9},
- "W1JetsToLNu250":{"xsec":8.05},
- "W1JetsToLNu400":{"xsec":0.89},
- "W2JetsToLNu150":{"xsec":105.9},
- "W2JetsToLNu250":{"xsec":18.67},
- "W2JetsToLNu400":{"xsec":3.04},
  "lumi":16800
  },
 "2016APV":{
@@ -43,18 +31,6 @@
  "TTbarMtt700": {"xsec": 66.85},
  "TTbarMtt1000": {"xsec": 16.38},
  "TTbarSemileptonic": {"xsec": 365.34},
- "DY1JetsToLL150":{"xsec":9.543},
- "DY1JetsToLL250":{"xsec":1.097},
- "DY1JetsToLL400":{"xsec":0.1207},
- "DY2JetsToLL150":{"xsec":15.65},
- "DY2JetsToLL250":{"xsec":2.74},
- "DY2JetsToLL400":{"xsec":0.4492},
- "W1JetsToLNu150":{"xsec":71.9},
- "W1JetsToLNu250":{"xsec":8.05},
- "W1JetsToLNu400":{"xsec":0.89},
- "W2JetsToLNu150":{"xsec":105.9},
- "W2JetsToLNu250":{"xsec":18.67},
- "W2JetsToLNu400":{"xsec":3.04},
  "lumi":19500
  },
 "2017":{
@@ -74,12 +50,12 @@
  "TTbarSemileptonic": {"xsec": 365.34},
  "DYJetsToLL100":{"xsec":93.61},
  "DYJetsToLL250":{"xsec":3.67},
- "DYJetsToLL400":{"xsec":0.50},
+ "DYJetsToLL400":{"xsec":0.5000},
  "DYJetsToLL650":{"xsec":0.04704},
- "WJetsToLNu100":{"xsec":756.9},
- "WJetsToLNu250":{"xsec":27.71},
- "WJetsToLNu400":{"xsec":3.544},
- "WJetsToLNu600":{"xsec":0.5399},
+ "WJetsToLNu100":{"xsec":763.7},
+ "WJetsToLNu250":{"xsec":27.55},
+ "WJetsToLNu400":{"xsec":3.477},
+ "WJetsToLNu600":{"xsec":0.5415},
  "lumi":41500
 },
  "2018":{
@@ -97,10 +73,6 @@
  "TTbarMtt700": {"xsec": 66.85},
  "TTbarMtt1000": {"xsec": 16.38},
  "TTbarSemileptonic": {"xsec": 365.34},
- "DYJetsToLL100":{"xsec":93.61},
- "DYJetsToLL250":{"xsec":3.67},
- "DYJetsToLL400":{"xsec":0.50},
- "DYJetsToLL650":{"xsec":0.04704},
  "lumi":59800
  }
 }

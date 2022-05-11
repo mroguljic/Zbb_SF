@@ -17,7 +17,7 @@ def multiplyCorrs(h1,h2):
         h1.SetBinContent(i,newVal)
     return h1
 
-def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
+def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=""):
     plt.style.use([hep.style.CMS])
     LO, edges   = hist2array(LO,return_edges=True)
     LOcorr      = hist2array(LOcorr,return_edges=False)
@@ -58,7 +58,7 @@ def plotPts(LO,LOcorr,NLO,outputFile,legendTitle=2016):
 
     plt.clf()
 
-def plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,outputFile,year=2016):
+def plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,outputFile):
     plt.style.use([hep.style.CMS])
     corr, edgesCorr = hist2array(corr,return_edges=True)
     d1KUp,edgesUnc  = hist2array(d1KUp,return_edges=True)
@@ -71,12 +71,12 @@ def plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,outputFile,year=2016):
     labels     = ["d1K Unc","d2K Unc","_nolegend_","_nolegend_"]
     linestyles = ["--",":","--",":"]
     colors     = ["red","green","red","green"]
-    hep.histplot(corr,edgesCorr[0],stack=False,label=["{0} NLO QCD correction".format(year)],linewidth=2,histtype="step",linestyle=["-"],color=["black"])
+    hep.histplot(corr,edgesCorr[0],stack=False,label=["NLO QCD correction"],linewidth=2,histtype="step",linestyle=["-"],color=["black"])
     hep.histplot(histos,edgesUnc[0],stack=False,label=labels,linewidth=2,histtype="step",linestyle=linestyles,color=colors)
 
     hep.cms.lumitext(text="(13 TeV)")
     hep.cms.text("Simulation Work in progress",loc=0)
-    plt.legend(loc="best",title=year)
+    plt.legend(loc="best")
     ax.set_yscale("linear")
     ax.set_xlim([200,2000])
     ax.set_ylim([0,None])
@@ -125,17 +125,14 @@ corrFile    = r.TFile.Open("NLO_corrections.root")
 shapesFile  = r.TFile.Open("NLOcheck.root")
 
 #Z+Jets corrections
-for year in ["2016","2017"]:
+for year in ["2017"]:
     ptNLO       = shapesFile.Get("DYJetsToLL_{0}_gen_V_pT".format(year))
     ptNLO.Scale(6.93)#BR(Z->qq)/BR(Z->ll)
 
     ptLO        = shapesFile.Get("ZJets_{0}_gen_V_pT".format(year))
     ptLOkFac    = ptLO.Clone("ZJets_{0}_gen_V_pT_corr".format(year))
 
-    if(year=="2016"):
-        corr        = corrFile.Get("QCD_Z_16")
-    else:
-        corr        = corrFile.Get("QCD_Z_17")
+    corr        = corrFile.Get("QCD_Z")
 
     for i in range(1,ptLO.GetNbinsX()+1):
         pt          = ptLO.GetBinCenter(i)
@@ -143,21 +140,18 @@ for year in ["2016","2017"]:
 
         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
-    plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_Z.png".format(year),legendTitle=year)
+    plotPts(ptLO,ptLOkFac,ptNLO,"plots/QCD_Z.png")
 
 
 
 # #W+Jets corrections
-for year in ["2016","2017"]:
+for year in ["2017"]:
     ptNLO       = shapesFile.Get("WJetsToLNu_{0}_gen_V_pT".format(year))
     ptNLO.Scale(2.09)#BR(W->qq)/BR(W->lnu)
     ptLO        = shapesFile.Get("WJets_{0}_gen_V_pT".format(year))
     ptLOkFac    = ptLO.Clone("WJets_{0}_gen_V_pT_corr".format(year))
 
-    if(year=="2016"):
-        corr        = corrFile.Get("QCD_W_16")
-    else:
-        corr        = corrFile.Get("QCD_W_17")
+    corr        = corrFile.Get("QCD_W")
 
     for i in range(1,ptLO.GetNbinsX()+1):
         pt          = ptLO.GetBinCenter(i)
@@ -165,17 +159,14 @@ for year in ["2016","2017"]:
 
         ptLOkFac.SetBinContent(i,ptLOkFac.GetBinContent(i)*kFac)
 
-    plotPts(ptLO,ptLOkFac,ptNLO,"plots/{0}_W.png".format(year),legendTitle=year)
+    plotPts(ptLO,ptLOkFac,ptNLO,"plots/QCD_W.png")
 
 
 #NLO QCD corr with unc
-for year in ["2016","2017"]:
+for year in ["2017"]:
     corrFile    = r.TFile.Open("NLO_corrections.root")
     for V in ["Z","W"]:
-        if(year=="2016"):
-            corr        = corrFile.Get("QCD_{0}_16".format(V))
-        else:
-            corr        = corrFile.Get("QCD_{0}_17".format(V))
+        corr        = corrFile.Get("QCD_{0}".format(V))
 
         ewkNom = corrFile.Get("EWK_{0}_nominal".format(V))
         d1KUp  = corrFile.Get("EWK_{0}_d1K_NLO_up".format(V))
@@ -193,7 +184,7 @@ for year in ["2016","2017"]:
         d1KDn = multiplyCorrs(d1KDn,corr)
         d2KDn = multiplyCorrs(d2KDn,corr)
 
-        plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,"plots/{0}_{1}_QCDcorrection.png".format(year,V),year=year)
+        plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,"plots/{0}_QCDcorrection.png".format(V))
     corrFile.Close()
 
 #NLO EWK corr with unc
