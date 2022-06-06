@@ -1,0 +1,46 @@
+{
+  "ZJets_b": {
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
+    "color":"blue",
+    "label": "Z+Jets bb",
+    "order": 6
+  },
+  "ZJets_c": {
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
+    "color":"slateblue",
+    "label": "Z+Jets cc",
+    "order": 6
+  },
+  "ZJets_light": {
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
+    "color":"deepskyblue",
+    "label": "Z+Jets light",
+    "order": 6
+  },
+  "ZJets_unm": {
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
+    "color":"turquoise",
+    "label": "Z+Jets unm",
+    "order": 6
+  },
+  "WJets_c": {
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
+    "color":"orange",
+    "label": "W+Jets cs",
+    "order": 5
+  },
+  "WJets_light": {
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
+    "color":"salmon",
+    "label": "W+Jets light",
+    "order": 5
+  },
+  "WJets_unm": {
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
+    "color":"magenta",
+    "label": "W+Jets unm",
+    "order": 5
+  }
+}
+
+

@@ -1,60 +1,60 @@
 {
   "ZJets_b": {
-    "file": "results/templates/0.98/2016/scaled/ZJets16.root",
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
     "color":"blue",
     "label": "Z+Jets bb",
     "order": 6
   },
   "ZJets_c": {
-    "file": "results/templates/0.98/2016/scaled/ZJets16.root",
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
     "color":"slateblue",
     "label": "Z+Jets cc",
     "order": 6
   },
   "ZJets_light": {
-    "file": "results/templates/0.98/2016/scaled/ZJets16.root",
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
     "color":"deepskyblue",
     "label": "Z+Jets light",
     "order": 6
   },
   "ZJets_unm": {
-    "file": "results/templates/0.98/2016/scaled/ZJets16.root",
+    "file": "results/templates/0.94/2016/scaled/ZJets16.root",
     "color":"lavender",
     "label": "Z+Jets unm",
     "order": 6
   },
   "WJets_c": {
-    "file": "results/templates/0.98/2016/scaled/WJets16.root",
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
     "color":"tomato",
     "label": "W+Jets cs",
     "order": 5
   },
   "WJets_light": {
-    "file": "results/templates/0.98/2016/scaled/WJets16.root",
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
     "color":"salmon",
     "label": "W+Jets light",
     "order": 5
   },
   "WJets_unm": {
-    "file": "results/templates/0.98/2016/scaled/WJets16.root",
+    "file": "results/templates/0.94/2016/scaled/WJets16.root",
     "color":"mistyrose",
     "label": "W+Jets unm",
     "order": 5
   },
   "TTbar": {
-    "file": "results/templates/0.98/2016/scaled/TTbar16.root",
+    "file": "results/templates/0.94/2016/scaled/TTbar16.root",
     "color":"magenta",
     "label": "ttbar",
     "order": 1
   },
   "QCD": {
-    "file": "results/templates/0.98/2016/scaled/QCD16.root",
+    "file": "results/templates/0.94/2016/scaled/QCD16.root",
     "color":"gold",
     "label": "Multijets",
     "order": 3
   },
   "data_obs": {
-    "file": "results/templates/0.98/2016/scaled/JetHT16.root",
+    "file": "results/templates/0.94/2016/scaled/JetHT16.root",
     "color":"k",
     "label": "Data",
     "order": 8

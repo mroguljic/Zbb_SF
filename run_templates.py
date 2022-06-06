@@ -11,12 +11,14 @@ sample = sys.argv[2]
 outDir = sys.argv[3]
 wp     = sys.argv[4]
 
-if("2016" in iDir):
-    year=2016
-if("2017" in iDir):
-    year=2017
-if("2018" in iDir):
-    year=2018
+if("2016/" in iDir):
+    year="2016"
+if("2016APV/" in iDir):
+    year="2016APV"
+if("2017/" in iDir):
+    year="2017"
+if("2018/" in iDir):
+    year="2018"
 
 
 variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown"]

@@ -41,6 +41,12 @@
     "label": "W+Jets unm",
     "order": 5
   },
+  "ST": {
+    "file": "results/templates/0.98/2016/scaled/ST16.root",
+    "color":"turquoise",
+    "label": "ST",
+    "order": 2
+  },
   "TTbar": {
     "file": "results/templates/0.98/2016/scaled/TTbar16.root",
     "color":"magenta",

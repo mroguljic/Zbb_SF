@@ -60,8 +60,7 @@ def lumiNormalization(wp=0.98):
 
     processes = ["QCD700","QCD1000","QCD1500","QCD2000","TTbarHadronic","TTbarSemileptonic","TTbarMtt700","TTbarMtt1000",
     "WJets400","WJets600","WJets800","ZJets400","ZJets600","ZJets800"]
-    #for year in ['2016','2017','2018']:
-    for year in ['2018']:
+    for year in ['2016','2016APV','2017','2018']:
         print(year)
         nonScaledDir = "results/templates/{0}/{1}/nonScaled/".format(wp,year)
         lumiScaledDir = "results/templates/{0}/{1}/scaled/".format(wp,year)
@@ -78,25 +77,25 @@ def lumiNormalization(wp=0.98):
         
         QCDsamples = ["QCD700.root","QCD1000.root","QCD1500.root","QCD2000.root"]
         QCDsamples = [lumiScaledDir+f for f in QCDsamples if (os.path.isfile(os.path.join(lumiScaledDir, f)))]
-        mergeSamples(QCDsamples,"{0}/QCD{1}.root".format(lumiScaledDir,year[-2:]),"QCD\d+_","QCD_")
+        mergeSamples(QCDsamples,"{0}/QCD{1}.root".format(lumiScaledDir,year[2:]),"QCD\d+_","QCD_")
 
         ttSamples = ["TTbarHadronic.root","TTbarSemileptonic.root","TTbarMtt700.root","TTbarMtt1000"]
         ttSamples = [lumiScaledDir+f for f in ttSamples if (os.path.isfile(os.path.join(lumiScaledDir, f)))]
-        mergeSamples(ttSamples,"{0}/TTbar{1}.root".format(lumiScaledDir,year[-2:]),"TTbarSemileptonic|TTbarMtt700|TTbarMtt1000|TTbarHadronic","TTbar")
+        mergeSamples(ttSamples,"{0}/TTbar{1}.root".format(lumiScaledDir,year[2:]),"TTbarSemileptonic|TTbarMtt700|TTbarMtt1000|TTbarHadronic","TTbar")
 
         WJetsSamples = ["WJets400.root","WJets600.root","WJets800.root"]
         WJetsSamples = [lumiScaledDir+f for f in WJetsSamples if (os.path.isfile(os.path.join(lumiScaledDir, f)))]
-        mergeSamples(WJetsSamples,"{0}/WJets{1}.root".format(lumiScaledDir,year[-2:]),"[A-Z]Jets\d+_","WJets_")
+        mergeSamples(WJetsSamples,"{0}/WJets{1}.root".format(lumiScaledDir,year[2:]),"[A-Z]Jets\d+_","WJets_")
 
         ZJetsSamples = ["ZJets400.root","ZJets600.root","ZJets800.root"]
         ZJetsSamples = [lumiScaledDir+f for f in ZJetsSamples if (os.path.isfile(os.path.join(lumiScaledDir, f)))]
-        mergeSamples(ZJetsSamples,"{0}/ZJets{1}.root".format(lumiScaledDir,year[-2:]),"[A-Z]Jets\d+_","ZJets_")
+        mergeSamples(ZJetsSamples,"{0}/ZJets{1}.root".format(lumiScaledDir,year[2:]),"[A-Z]Jets\d+_","ZJets_")
 
         JetHTSamples = [nonScaledDir+f for f in os.listdir(nonScaledDir) if (os.path.isfile(os.path.join(nonScaledDir, f)) and "JetHT" in f)]
-        mergeSamples(JetHTSamples,"{0}/JetHT{1}.root".format(lumiScaledDir,year[-2:]),"JetHT201[0-9][A-Z]_","data_obs_")
+        mergeSamples(JetHTSamples,"{0}/JetHT{1}.root".format(lumiScaledDir,year[2:]),"JetHT201[0-9][a-zA-Z]+_","data_obs_")
 
 
 if __name__ == '__main__':
 
-    #lumiNormalization(wp=0.94)
-    lumiNormalization(wp=0.98)
+    lumiNormalization(wp=0.94)
+    #lumiNormalization(wp=0.98)

@@ -140,6 +140,9 @@ if not isData:
     if(year=="2018"):
         hemCorr = genWCorr.Clone("hemCorrection")
         a.AddCorrection(hemCorr, evalArgs={'val':'HEM_drop__nom'})
+    if(year!="2018"):
+        prefireCorr = genWCorr.Clone("prefireUnc",newMainFunc="evalWeight",newType="weight")
+        a.AddCorrection(prefireCorr, evalArgs={'val':'Prefire__nom','valUp':'Prefire__up','valDown':'Prefire__down'})
 
     trigFile   = "data/trig_eff_{0}.root".format(year)
     a.Define("pt_for_trig","TMath::Min(Double_t(FatJet_pt0),999.)")#Trigger eff, measured up to 1000 GeV (well withing 100% eff. regime)

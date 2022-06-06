@@ -2,10 +2,9 @@ import os
 import glob
 
 
-wp   = 0.98
+wp   = 0.94
 args = ""
-#for year in ["2016","2017","2018"]:
-for year in ["2018"]:
+for year in ["2016","2016APV","2017","2018"]:
 	evtSelDir = "/users/mrogul/Work/Zbb_SF/results/selection/{0}/".format(year)
 	tplDir    = "/users/mrogul/Work/Zbb_SF/results/templates/{0}/{1}/".format(wp,year)
 	nomFiles  = glob.glob('{0}/*nom.root'.format(evtSelDir))

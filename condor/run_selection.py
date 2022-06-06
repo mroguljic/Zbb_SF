@@ -61,7 +61,10 @@ def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=Fa
         if ("ZJets" in sample or "WJets" in sample):
             #Only running variation on V+Jets (QCD is data-driven)
             exeScript = selection_template.replace("JOB_DIR",sampleJobs_dir)
-            nPerJob   = 4 #since we're running variations on V+Jets, decrease files to process per job
+            nPerJob   = nFiles
+            if("800" in sample):
+                #samples with highest HT take more time to process, so process fewer files per job
+                nPerJob   = 4 
         else:
             exeScript = selection_template_data.replace("JOB_DIR",sampleJobs_dir)
             nPerJob   = nFiles
@@ -92,7 +95,7 @@ def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=Fa
             open(inputPath, 'w').writelines("{}\n".format(root_file) for root_file in l)
             processedFlag   = checkIfAlreadyProcessed('{0}_{1}.root'.format(sample,n),sampleOut_dir,sample)
             
-            if not processedFlag:
+            if processedFlag==False and congregateFlag==False:
                 argsFile.write("-i {0} -o {1} -p {2} -y {3}\n".format(inputPath,outputPath,sample,year))
                 nToRun+=1
 
@@ -119,7 +122,7 @@ def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=Fa
 def haddResults(outDir):
     os.chdir(outDir)
     directories= [d for d in os.listdir(os.getcwd()) if os.path.isdir(d)]
-    variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp"]
+    variations = ["nom","jesUp","jesDown","jerUp","jerDown","jmsUp","jmsDown","jmrUp","jmrDown"]
 
     for d in directories:
         for variation in variations:
@@ -149,7 +152,7 @@ def main():
     datasets    = "selection_configs/{0}.json".format(year)
     outDir      = "/users/mrogul/Work/Zbb_SF/results/selection/{0}/".format(year)
     jobsDir     = "/users/mrogul/Work/Zbb_SF/condor/selection_jobs/{0}/".format(year)
-    filesPerJob = 10
+    filesPerJob = 20
 
     createDirIfNotExist(outDir)
 
