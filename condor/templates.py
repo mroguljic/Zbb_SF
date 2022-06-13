@@ -11,12 +11,12 @@ queue
 
 selection_template='''#!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cd /users/mrogul/Work/CMSSW_11_1_4/
+cd /users/mrogul/Work/CMSSW_12_3_0/
 eval `scramv1 runtime -sh`
-cd /users/mrogul/Work/
+cd /users/mrogul/Work/Zbb_SF_py3/
 source timber-env/bin/activate
 
-export WORK_DIR=/users/mrogul/Work/Zbb_SF/
+export WORK_DIR=/users/mrogul/Work/Zbb_SF_py3/Zbb_SF/
 cd JOB_DIR
 
 echo eventSelection.py $*
@@ -33,12 +33,12 @@ python $WORK_DIR/eventSelection.py $* --var jmrDown
 
 selection_template_data='''#!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cd /users/mrogul/Work/CMSSW_11_1_4/
+cd /users/mrogul/Work/CMSSW_12_3_0/
 eval `scramv1 runtime -sh`
-cd /users/mrogul/Work/
+cd /users/mrogul/Work/Zbb_SF_py3/
 source timber-env/bin/activate
 
-export WORK_DIR=/users/mrogul/Work/Zbb_SF/
+export WORK_DIR=/users/mrogul/Work/Zbb_SF_py3/Zbb_SF/
 cd JOB_DIR
 
 echo eventSelection.py $*
@@ -47,12 +47,12 @@ python $WORK_DIR/eventSelection.py $* --var nom
 
 skim_template='''#!/bin/bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cd /users/mrogul/Work/CMSSW_11_1_4/
+cd /users/mrogul/Work/CMSSW_12_3_0/
 eval `scramv1 runtime -sh`
-cd /users/mrogul/Work/
+cd /users/mrogul/Work/Zbb_SF_py3/
 source timber-env/bin/activate
 
-export WORK_DIR=/users/mrogul/Work/Zbb_SF/
+export WORK_DIR=/users/mrogul/Work/Zbb_SF_py3/Zbb_SF/
 cd JOB_DIR
 
 echo $WORK_DIR/snapshot.py $*

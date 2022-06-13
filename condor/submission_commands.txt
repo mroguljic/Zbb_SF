@@ -1,11 +1,11 @@
-python run_skim.py -c skim_configs/2016/data.json -y 2016 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9/2016/
-python run_skim.py -c skim_configs/2016/mc.json -y 2016 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9/2016/
-python run_skim.py -c skim_configs/2016APV/data.json -y 2016APV -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9/2016APV/
-python run_skim.py -c skim_configs/2016APV/mc.json -y 2016APV -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9/2016APV/
-python run_skim.py -c skim_configs/2017/data.json -y 2017 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9/2017/
-python run_skim.py -c skim_configs/2017/mc.json -y 2017 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9/2017/
-python run_skim.py -c skim_configs/2018/data.json -y 2018 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9/2018/
-python run_skim.py -c skim_configs/2018/mc.json -y 2018 -j /users/mrogul/Work/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9/2018/ 
+python run_skim.py -c skim_configs/2016/data.json -y 2016 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9_py3/2016/
+python run_skim.py -c skim_configs/2016/mc.json -y 2016 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2016/ -o /STORE/matej/Zbb_skims/v9_py3/2016/
+python run_skim.py -c skim_configs/2016APV/data.json -y 2016APV -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9_py3/2016APV/
+python run_skim.py -c skim_configs/2016APV/mc.json -y 2016APV -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2016APV/ -o /STORE/matej/Zbb_skims/v9_py3/2016APV/
+python run_skim.py -c skim_configs/2017/data.json -y 2017 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9_py3/2017/
+python run_skim.py -c skim_configs/2017/mc.json -y 2017 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2017/ -o /STORE/matej/Zbb_skims/v9_py3/2017/
+python run_skim.py -c skim_configs/2018/data.json -y 2018 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9_py3/2018/
+python run_skim.py -c skim_configs/2018/mc.json -y 2018 -j /users/mrogul/Work/Zbb_SF_py3/Zbb_SF/condor/skim_jobs/2018/ -o /STORE/matej/Zbb_skims/v9_py3/2018/ 
 
 
 python run_selection.py -y 2016APV
