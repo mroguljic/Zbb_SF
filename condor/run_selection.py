@@ -4,6 +4,7 @@ import os, sys, re
 from templates import *
 from run_skim import createDirIfNotExist
 import ROOT as r
+from paths import SELECTION_DIR, SELECTION_JOB_DIR
 
 def split_jobs(files, njobs):
     for i in range(0, len(files), njobs):
@@ -16,7 +17,11 @@ def removeEmptyFiles(inputPath):
             filePath    = line.strip()
             rFile       = r.TFile.Open(filePath)
             ttree       = rFile.Get("Events")
-            treeSize    = ttree.GetEntriesFast()
+            try:
+                treeSize    = ttree.GetEntriesFast()
+            except:
+                print("Couldn't get ttree in file {0}".format(filePath))
+                treeSize = 0
             if(treeSize!=0):
                 nonEmptyInput.append(line)
     with open(inputPath, "w+") as writer:
@@ -150,20 +155,20 @@ def main():
     year        = args.year
 
     datasets    = "selection_configs/{0}.json".format(year)
-    outDir      = "/users/mrogul/Work/Zbb_SF/results/selection/{0}/".format(year)
-    jobsDir     = "/users/mrogul/Work/Zbb_SF/condor/selection_jobs/{0}/".format(year)
+    outDir      = "{0}/{1}".format(SELECTION_DIR,year)
+    jobsDir     = "{0}/{1}".format(SELECTION_JOB_DIR,year)
     filesPerJob = 20
 
     createDirIfNotExist(outDir)
 
     if os.listdir(outDir):
         print("Output directory {0} is not empty".format(outDir))
-        delFlag = raw_input("Delete files in {0}? [y/N]".format(outDir))
+        delFlag = input("Delete files in {0}? [y/N]".format(outDir))
         if delFlag=="y":
             os.system("rm -r {0}/*".format(outDir))
 
 
-    checkInputFlag = raw_input("Check input for empty skim files? [y/N]")
+    checkInputFlag = input("Check input for empty skim files? [y/N]")
 
     with open(datasets) as config_file:
         config  = json.load(config_file)

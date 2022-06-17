@@ -97,5 +97,5 @@ def lumiNormalization(wp=0.98):
 
 if __name__ == '__main__':
 
-    lumiNormalization(wp=0.94)
-    #lumiNormalization(wp=0.98)
+    #lumiNormalization(wp=0.94)
+    lumiNormalization(wp=0.98)

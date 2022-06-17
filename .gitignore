@@ -22,3 +22,4 @@ misc/*
 condor/selection_jobs/
 condor/skim_jobs/
 *pyc
+condor/template_jobs/

@@ -3,7 +3,7 @@
 import os, sys, re
 from templates import *
 import subprocess
-
+from paths import SKIM_DIR, SKIM_JOB_DIR
 
 def createDirIfNotExist(path):
     if not os.path.exists(path):
@@ -86,16 +86,17 @@ def main():
 
     parser.add_argument('-c', '--config', help='Job config file in JSON format')
     parser.add_argument('-y', '--year', help='Dataset year',default="2016")
-    parser.add_argument('-o', '--outdir',help='Output directory')
-    parser.add_argument('-j', '--jobdir',help='Jobs directory')
  
     args = parser.parse_args()
 
     print(args)
 
+    out_dir  = "{0}/{1}".format(SKIM_DIR,args.year)
+    jobs_dir = "{0}/{1}".format(SKIM_JOB_DIR,args.year)
+
     with open(args.config, 'r') as config_file:
         config = json.load(config_file)
-        create_jobs(config,year=args.year,out_dir=args.outdir,jobs_dir=args.jobdir)
+        create_jobs(config,year=args.year,out_dir=out_dir,jobs_dir=jobs_dir)
                     
 
             
