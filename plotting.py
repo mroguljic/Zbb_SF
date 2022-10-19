@@ -47,7 +47,7 @@ def plotRPF(postfitShapesFile,odir,polyOrder):
     ax.set_ylim([450,2000])
 
 
-    plt.xlabel("$M_{SD}$ [GeV]",horizontalalignment='right', x=1.0)
+    plt.xlabel("$M_{PNet}$ [GeV]",horizontalalignment='right', x=1.0)
     plt.ylabel("$p_{T}$ [GeV]",horizontalalignment='right', y=1.0)
     ax.yaxis.set_tick_params(which='minor', left=False)    
     ax.yaxis.set_tick_params(which='minor', right=False)    
@@ -90,7 +90,7 @@ def plotRPFSurf(postfitShapesFile,odir,polyOrder,zmax=20.):
     clb = f.colorbar(surf,shrink=0.7)
     clb.set_label('$R_{P/F}$ x $10^{3}$')
 
-    plt.ylabel("$M_{SD}$ [GeV]",horizontalalignment='right', x=1.0,labelpad=15,fontsize=22)
+    plt.ylabel("$M_{PNet}$ [GeV]",horizontalalignment='right', x=1.0,labelpad=15,fontsize=22)
     plt.xlabel("$p_{T}$ [GeV]",horizontalalignment='right', y=1.0,labelpad=15,fontsize=22)
     ax.tick_params(axis='x', labelsize=22)
     ax.tick_params(axis='y', labelsize=22)
@@ -485,7 +485,7 @@ def plotShapes(hData,hMC,uncBand,labelsMC,colorsMC,xlabel,outputFile,xRange=[],y
     hep.histplot(pulls,edges[0],ax=axs[1],linewidth=1,histtype="fill",facecolor="grey",edgecolor='black')
 
     print("Saving ", outputFile)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig(outputFile,bbox_inches="tight")
     plt.savefig(outputFile.replace("png","pdf"))
 
@@ -553,7 +553,7 @@ def plotPostfit(postfitShapesFile,region,odir,prefitTag=False):
             projUpEdge          = int(totalProcs.GetYaxis().GetBinUpEdge(i))
             projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
 
-            plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{SD}$ [GeV]","{0}/{1}_{2}_{3}.png".format(odir,outFile,region,i),xRange=[50,150],projectionText=projectionText)
+            plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{PNet}$ [GeV]","{0}/{1}_{2}_{3}.png".format(odir,outFile,region,i),xRange=[50,150],projectionText=projectionText)
 
     projections         = []
     for j,twoDShape in enumerate(twoDShapes):
@@ -563,7 +563,7 @@ def plotPostfit(postfitShapesFile,region,odir,prefitTag=False):
     projections.append(totalProcs_proj)
     uncBand_proj        = getUncBand(totalProcs_proj)
 
-    plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{SD}$ [GeV]","{0}/{1}_{2}.png".format(odir,outFile,region),xRange=[50,150])
+    plotShapes(projections[0],projections[1:],uncBand_proj,labels[1:],colors[1:],"$M_{PNet}$ [GeV]","{0}/{1}_{2}.png".format(odir,outFile,region),xRange=[50,150])
 
     tags.append("Total")
     print("Yields in {0}".format(region))
@@ -698,7 +698,7 @@ def plotVJetsInFit(postfitShapesFile,region,odir):
             projUpEdge          = int(twoDShapes[0].GetYaxis().GetBinUpEdge(i))
             projectionText      = "{0}".format(projLowEdge)+"<$p_{T}$<"+"{0} GeV".format(projUpEdge)
 
-            plotLines(projections,labels,colors,"M_{SD} [GeV]",linestyles,"{0}/VJets_{1}_{2}.png".format(odir,region,i),xRange=[50,150],yRange=yRanges[i-1],projectionText=projectionText)
+            plotLines(projections,labels,colors,"M_{PNet} [GeV]",linestyles,"{0}/VJets_{1}_{2}.png".format(odir,region,i),xRange=[50,150],yRange=yRanges[i-1],projectionText=projectionText)
 
 def SFcompTight():
     #SF comp 2016
@@ -807,12 +807,12 @@ def SFcompPtSplit(yr,region,polyOrderPt,polyOrderIncl):
 def SFcompYears():
     #SF comp 2016
     SF_T     = [0.80,0.90,1.12,1.02]
-    errsUp_T = [0.16,0.17,0.15,0.12]
+    errsUp_T = [0.16,0.17,0.14,0.12]
     errsDn_T = [0.15,0.18,0.13,0.11]
 
-    SF_L     = [0.89,1.06,1.12,1.18]
-    errsUp_L = [0.17,0.10,0.17,0.11]
-    errsDn_L = [0.20,0.28,0.15,0.17]
+    SF_L     = [0.87,0.95,1.12,1.14]
+    errsUp_L = [0.19,0.20,0.17,0.16]
+    errsDn_L = [0.19,0.18,0.15,0.12]
 
     plt.style.use([hep.style.CMS])
     f, ax = plt.subplots()
@@ -853,12 +853,70 @@ def printMCYields(data,region,year):
         hist    = f.Get("{0}_m_pT_{1}__nominal".format(sample,region))
         print("{0:10}\t{1:.0f}".format(sample,hist.Integral()))
 
+def getSF(workingArea,polyOrder,cmsswArea):
+    fitDir  = "{0}/{1}/{2}_area".format(cmsswArea,workingArea,polyOrder)
+    fitFile = r.TFile.Open("{0}/higgsCombineTest.MultiDimFit.mH120.root".format(fitDir))
+    ttree   = fitFile.Get("limit")
+    ttree.GetEvent(0)
+    sf      = ttree.SF_ZJets_bc
+    ttree.GetEvent(1)
+    errDn   = sf-ttree.SF_ZJets_bc
+    ttree.GetEvent(2)
+    errUp   = ttree.SF_ZJets_bc-sf
+    return sf,errDn,errUp
+
+def plotSFs(workingAreas,bestOrders,cmsswArea):
+    sfs     = {}
+    errsDn  = {}
+    errsUp  = {}
+    for workingArea in workingAreas:
+        polyOrder       = bestOrders[workingArea]
+        sf,errDn,errUp  = getSF(workingArea,polyOrder,cmsswArea)
+        wp=workingArea.split("_")[-1]
+        if not wp in sfs:
+            sfs[wp]     = []
+            errsDn[wp]  = []
+            errsUp[wp]  = []
+        sfs[wp].append(sf)
+        errsDn[wp].append(errDn)
+        errsUp[wp].append(errUp)
+
+    plt.style.use([hep.style.CMS])
+    f, ax = plt.subplots()
+
+    plt.sca(ax)
+    fmts = ['ro','bv','m^']
+    for i,wp in enumerate(sfs):
+        plt.errorbar([2014.9+0.1*i,2015.9+0.1*i,2016.9+0.1*i,2017.9+0.1*i], sfs[wp], yerr=[errsDn[wp],errsUp[wp]],fmt=fmts[i],label="{0} WP".format(wp.title()))
+
+
+    plt.ylabel("Scale factor",horizontalalignment='right', y=1.0)
+    plt.xlabel("",horizontalalignment='right', x=1.0)
+    xLabels=["2016APV","2016","2017","2018"]
+    xTicks=[2015,2016,2017,2018]
+    ax.set_xticks(xTicks)
+    ax.set_xticklabels(xLabels)
+    ax.set_xlim(2014,2019)
+    ax.set_ylim(0.,2.0)
+    ax.xaxis.set_tick_params(which='minor', top=False,bottom=False)    
+    plt.axhline(y=1.0, color='gray', linestyle='--')
+    plt.legend(ncol=2)
+
+    hep.cms.lumitext("(13 TeV)")
+    hep.cms.text("Work in progress",loc=0)
+
+    print("Saving SF.pdf")
+    plt.savefig("results/plots/SF.pdf",bbox_inches="tight")
+    plt.savefig("results/plots/SF.png",bbox_inches="tight")
+
+    plt.clf()
+    plt.cla()
 
 if __name__ == '__main__':
 
 
     # for year in ["2016","2016APV","2017","2018"]:
-    #     odir = "results/plots/0.98/{0}/".format(year)
+    #     odir = "results/plots/tight/{0}/".format(year)
     #     Path(odir).mkdir(parents=True, exist_ok=True)
         
     #     if(year=="2016APV"):
@@ -907,94 +965,70 @@ if __name__ == '__main__':
     #         plotTriggerEff(hPass,hTotal,year,luminosity,"{0}/Trig_eff_M_{1}.png".format(odir,year),xlabel="$M_{PNet}$ [GeV]",ylabel="Trigger efficiency")
 
 
-    #     with open("plotConfigs/Vjets{0}.json".format(year)) as json_file:
-    #         data = json.load(json_file)
-    #         plotVJets(data,"VpT_fail_nom","{0}/vpT_fail_lin.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5500],rebinX=1,luminosity=luminosity)
-    #         plotVJets(data,"VpT_pass_nom","{0}/vpT_pass_lin.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
-    #         plotVJets(data,"VpT_fail_nom","{0}/vpT_fail.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
-    #         plotVJets(data,"VpT_pass_nom","{0}/vpT_pass.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
+        # with open("plotConfigs/Vjets{0}.json".format(year)) as json_file:
+        #     data = json.load(json_file)
+        #     plotVJets(data,"VpT_fail_nom","{0}/vpT_fail_lin.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,5500],rebinX=1,luminosity=luminosity)
+        #     plotVJets(data,"VpT_pass_nom","{0}/vpT_pass_lin.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=False,xRange=[0,1500],yRange=[1.,300],rebinX=1,luminosity=luminosity)
+        #     plotVJets(data,"VpT_fail_nom","{0}/vpT_fail.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**5],rebinX=1,luminosity=luminosity)
+        #     plotVJets(data,"VpT_pass_nom","{0}/vpT_pass.png".format(odir),xTitle="$Gen V p_{T}$ [GeV]",yTitle="Events / 10 GeV",log=True,xRange=[0,1500],yRange=[1.,10**3],rebinX=1,luminosity=luminosity)
 
 
-    #         plotVJets(data,"m_pT_fail__nominal","{0}/mVJets_fail_lin.png".format(odir),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",log=False,xRange=[40,150],yRange=[0,5*10**4],rebinX=1,luminosity=luminosity,proj="X")
-    #         plotVJets(data,"m_pT_pass__nominal","{0}/mVJets_pass_lin.png".format(odir),xTitle="$M_{SD}$ [GeV]",yTitle="Events / 5 GeV",log=False,xRange=[40,150],yRange=[0,1200],rebinX=1,luminosity=luminosity,proj="X")
-
-    #Postfit T
-    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"SF16_T_split":"2","SF16APV_T_split":"3","SF17_T_split":"2","SF18_T_split":"2"}
-    # for workingArea in ["SF16_T_split","SF16APV_T_split","SF17_T_split","SF18_T_split"]:
-    #     polyOrder       = bestOrders[workingArea]
-    #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
-    #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
-
-    #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
-    #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
-
-    #Postfit L
-    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"SF16_L_split":"2","SF16APV_L_split":"2","SF17_L_split":"2","SF18_L_split":"3"}
-    # for workingArea in ["SF16_L_split","SF16APV_L_split","SF17_L_split","SF18_L_split"]:
-    #     polyOrder       = bestOrders[workingArea]
-    #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
-    #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
-
-    #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
-    #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+        #     plotVJets(data,"m_pT_fail__nominal","{0}/mVJets_fail_lin.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / 5 GeV",log=False,xRange=[40,150],yRange=[0,5*10**4],rebinX=1,luminosity=luminosity,proj="X")
+        #     plotVJets(data,"m_pT_pass__nominal","{0}/mVJets_pass_lin.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / 5 GeV",log=False,xRange=[40,150],yRange=[0,1200],rebinX=1,luminosity=luminosity,proj="X")
 
     #Postfit T
-    # cmsswArea       = "CMSSW_10_6_14/src/"
-    # bestOrders      = {"SF16_T":"2","SF16APV_T":"3","SF17_T":"2","SF18_T":"2"}
-    # for workingArea in ["SF16_T","SF16APV_T","SF17_T","SF18_T"]:
-    #     polyOrder       = bestOrders[workingArea]
-    #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
-    #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
+    cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    bestOrders      = {"16APV_tight":"2","16_tight":"3","17_tight":"2","18_tight":"2"}
+    workingAreas    = ["16APV_tight","16_tight","17_tight","18_tight"]
+    for workingArea in workingAreas:
+        polyOrder       = bestOrders[workingArea]
+        baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
+        fitFile         = baseDir+"postfitshapes_s.root"
+        Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
 
-    #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
-    #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+        try:
+            plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
+            plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
+            plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
+            plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
+        except:
+            print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
 
-    # #Postfit L
-    # cmsswArea       = "CMSSW_10_6_14/src/"
-    # bestOrders      = {"SF16_L":"2","SF16APV_L":"2","SF17_L":"2","SF18_L":"4"}
-    # for workingArea in ["SF16_L","SF16APV_L","SF17_L","SF18_L"]:
-    #     polyOrder   = bestOrders[workingArea]
-    #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
-    #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
-    #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
-    #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+
+    #Postfit M
+    cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    bestOrders      = {"16APV_medium":"2","16_medium":"2","17_medium":"3","18_medium":"2"}
+    workingAreas    = ["16APV_medium","16_medium","17_medium","18_medium"]
+    for workingArea in workingAreas:
+        polyOrder       = bestOrders[workingArea]
+        baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
+        fitFile         = baseDir+"postfitshapes_s.root"
+        Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
+
+        try:
+            plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
+            plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
+            plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
+            plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
+        except:
+            print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+
+    cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    bestOrders      = {"16APV_tight":"2","16_tight":"3","17_tight":"2","18_tight":"2","16APV_medium":"2","16_medium":"2","17_medium":"3","18_medium":"2"}
+    workingAreas    = ["16APV_medium","16_medium","17_medium","18_medium","16APV_tight","16_tight","17_tight","18_tight"]    
+    plotSFs(workingAreas,bestOrders,cmsswArea)
+
 
     # #plotVJetsInFit(fitFile,"T","results/plots/{0}/r_fit/")
     # #plotVJetsInFit(fitFile,"F","results/plots/{0}/r_fit/")
 
     # SFcompYears()
-    SFcompPtSplit("16","T",2,2)
-    SFcompPtSplit("16APV","T",3,3)
-    SFcompPtSplit("17","T",2,2)
-    SFcompPtSplit("18","T",2,2)
+    # SFcompPtSplit("16","T",2,2)
+    # SFcompPtSplit("16APV","T",3,3)
+    # SFcompPtSplit("17","T",2,2)
+    # SFcompPtSplit("18","T",2,2)
 
-    SFcompPtSplit("16","L",2,2)
-    SFcompPtSplit("16APV","L",2,2)
-    SFcompPtSplit("17","L",2,2)
-    SFcompPtSplit("18","L",2,4)
+    # SFcompPtSplit("16","L",2,2)
+    # SFcompPtSplit("16APV","L",2,2)
+    # SFcompPtSplit("17","L",2,2)
+    # SFcompPtSplit("18","L",2,4)
