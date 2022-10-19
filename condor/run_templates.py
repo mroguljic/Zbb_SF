@@ -7,7 +7,8 @@ from pathlib import Path
 import re
 import stat
 #python run_templates.py ceiling tight
-#python run_templates.py tight medium
+#python run_templates.py tight medium -> if you want to run exclusive wp
+#python run_templates.py ceiling medium -> if you want to run inclusive wp
 
 TEMPLATE_DIR = SELECTION_DIR.replace("selection","templates")
 
@@ -23,7 +24,8 @@ Path(template_jobs_log_dir).mkdir(exist_ok=True, parents=True)
 wp_ceiling	= {"2016APV":1.01,"2016":1.01,"2017":1.01,"2018":1.01}
 wp_tight  	= {"2016APV":0.9883,"2016":0.9883,"2017":0.9870,"2018":0.9880}
 wp_medium 	= {"2016APV":0.9737,"2016":0.9735,"2017":0.9714,"2018":0.9734}
-wp_vals   	= {"ceiling":wp_ceiling,"tight":wp_tight, "medium":wp_medium}
+wp_loose	= {"2016APV":0.9088,"2016":0.9137,"2017":0.9105,"2018":0.9172}
+wp_vals   	= {"ceiling":wp_ceiling,"tight":wp_tight, "medium":wp_medium, "loose":wp_loose}
 #for year in ["2016","2016APV","2017","2018"]:
 for year in ["2016","2017","2018"]:
 	evtSelDir = "{0}/{1}/".format(SELECTION_DIR,year)
