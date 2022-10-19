@@ -9,7 +9,8 @@ def createDirIfNotExist(path):
 iDir = sys.argv[1]
 sample = sys.argv[2]
 outDir = sys.argv[3]
-wp     = sys.argv[4]
+wpUp   = sys.argv[4]
+wpLo   = sys.argv[5]
 
 if("2016/" in iDir):
     year="2016"
@@ -37,6 +38,6 @@ for variation in variations:
         mode="RECREATE"
     else:
         mode="UPDATE"
-    cmd = "python templateMaker.py -i {0} -o {1} -y {2} -p {3} -v {4} -m {5} -w {6}".format(inputFile,outputFile,year,sample,variation,mode,wp)
+    cmd = "python templateMaker.py -i {0} -o {1} -y {2} -p {3} -v {4} -m {5} -w {6} -w {7}".format(inputFile,outputFile,year,sample,variation,mode,wpUp,wpLo)
     print(cmd)
     os.system(cmd)

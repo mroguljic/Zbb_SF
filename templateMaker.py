@@ -79,9 +79,9 @@ parser.add_option('-m', metavar='mode', type='string', action='store',
                 default   =   "RECREATE",
                 dest      =   'mode',
                 help      =   'RECREATE or UPDATE outputfile')
-parser.add_option('-w', '--wp', metavar='working point', action="store", type=float,
-                default   =   0.98,
-                dest      =   'wp',
+parser.add_option('-w', '--wp', metavar='working point', action="append", type=float,
+                default   =   [],
+                dest      =   'wps',
                 help      =   'Working point')
 
 
@@ -106,7 +106,9 @@ else:
 
 
 a = analyzer(iFile)
-pnetWp   = options.wp
+print(options.wps)
+pnetWpUp   = options.wps[0]
+pnetWpLo   = options.wps[1]
 year    = options.year
 histos=[]
 histGroups=[]
@@ -181,7 +183,7 @@ if not isData:
 
 a.MakeWeightCols()
 
-regionDefs = [("pass","pnet0>{0}".format(pnetWp)),("fail","pnet0<{0}".format(pnetWp))]
+regionDefs = [("pass","pnet0<{0} && pnet0>{1}".format(pnetWpUp, pnetWpLo)),("fail","pnet0<{0}".format(pnetWpLo))]
 regionYields = {}
 
 for region,cut in regionDefs:
@@ -214,7 +216,7 @@ for region,cut in regionDefs:
     regionYields[region] = getNweighted(a,isData)
 
 #include histos from evt sel in the template file for nominal template
-regionDefs = [("pass","pnet0>{0}".format(pnetWp)),("fail","pnet0<{0}".format(pnetWp))]
+regionDefs = [("pass","pnet0<{0} && pnet0>{1}".format(pnetWpUp, pnetWpLo)),("fail","pnet0<{0}".format(pnetWpLo))]
 
 
 

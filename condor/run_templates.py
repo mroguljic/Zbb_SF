@@ -6,26 +6,32 @@ from templates import templates_template, selection_condor
 from pathlib import Path
 import re
 import stat
-#python run_templates.py 0.94
-#python run_templates.py 0.98
+#python run_templates.py ceiling tight
+#python run_templates.py tight medium
 
 TEMPLATE_DIR = SELECTION_DIR.replace("selection","templates")
 
-wp   = sys.argv[1]
+wpUp   = sys.argv[1]
+wpLo   = sys.argv[2]
 args = ""
-template_jobs_wp_dir = os.path.join(TEMPLATE_JOB_DIR,wp)
+template_jobs_wp_dir = os.path.join(TEMPLATE_JOB_DIR,wpLo)
 Path(template_jobs_wp_dir).mkdir(exist_ok=True, parents=True)
 
 template_jobs_log_dir = os.path.join(template_jobs_wp_dir,"output")
 Path(template_jobs_log_dir).mkdir(exist_ok=True, parents=True)
 
-for year in ["2016","2016APV","2017","2018"]:
+wp_ceiling	= {"2016APV":1.01,"2016":1.01,"2017":1.01,"2018":1.01}
+wp_tight  	= {"2016APV":0.9883,"2016":0.9883,"2017":0.9870,"2018":0.9880}
+wp_medium 	= {"2016APV":0.9737,"2016":0.9735,"2017":0.9714,"2018":0.9734}
+wp_vals   	= {"ceiling":wp_ceiling,"tight":wp_tight, "medium":wp_medium}
+#for year in ["2016","2016APV","2017","2018"]:
+for year in ["2016","2017","2018"]:
 	evtSelDir = "{0}/{1}/".format(SELECTION_DIR,year)
-	tplDir    = "{0}/{1}/{2}".format(TEMPLATE_DIR,wp,year)
+	tplDir    = "{0}/{1}/{2}".format(TEMPLATE_DIR,wpLo,year)
 	nomFiles  = glob.glob('{0}/*nom.root'.format(evtSelDir))
 	for nomFile in nomFiles:
 		sample  = nomFile.split("/")[-1].replace("_nom.root","")
-		argLine = "{0} {1} {2} {3}\n".format(evtSelDir,sample,tplDir,wp)
+		argLine = "{0} {1} {2} {3} {4}\n".format(evtSelDir,sample,tplDir,wp_vals[wpUp][year],wp_vals[wpLo][year])
 		args+=argLine
 f = open("{0}/args.txt".format(template_jobs_wp_dir),"w")
 f.write(args)
