@@ -26,8 +26,7 @@ wp_tight  	= {"2016APV":0.9883,"2016":0.9883,"2017":0.9870,"2018":0.9880}
 wp_medium 	= {"2016APV":0.9737,"2016":0.9735,"2017":0.9714,"2018":0.9734}
 wp_loose	= {"2016APV":0.9088,"2016":0.9137,"2017":0.9105,"2018":0.9172}
 wp_vals   	= {"ceiling":wp_ceiling,"tight":wp_tight, "medium":wp_medium, "loose":wp_loose}
-#for year in ["2016","2016APV","2017","2018"]:
-for year in ["2016","2017","2018"]:
+for year in ["2016","2016APV","2017","2018"]:
 	evtSelDir = "{0}/{1}/".format(SELECTION_DIR,year)
 	tplDir    = "{0}/{1}/{2}".format(TEMPLATE_DIR,wpLo,year)
 	nomFiles  = glob.glob('{0}/*nom.root'.format(evtSelDir))
