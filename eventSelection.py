@@ -291,6 +291,14 @@ def eventSelection(options):
             snapshotColumns.append("genVpt")
             snapshotColumns.append("LHE_HT")
             snapshotColumns.append("VmatchedFatJetIdx")
+            a.Define("ISR__up","PSWeight[2]")
+            a.Define("ISR__down","PSWeight[0]")
+            a.Define("FSR__up","PSWeight[3]")
+            a.Define("FSR__down","PSWeight[1]")
+            snapshotColumns.append("ISR__up")
+            snapshotColumns.append("ISR__down")
+            snapshotColumns.append("FSR__up")
+            snapshotColumns.append("FSR__down")
 
         if year=="2018":
             snapshotColumns.append("HEM_drop__nom")
