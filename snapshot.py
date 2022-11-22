@@ -59,7 +59,7 @@ def Snapshot(ana,year,output):
     columns = [
         'n.*','^(?!.*__vec)FatJet_.*','HLT_PF*', 'HLT_AK8.*','Pileup_nTrueInt','Pileup_nPV',
         'event', 'eventWeight', 'luminosityBlock', 'run','Jet_pt', 'Jet_eta','Jet_phi', 'Jet_hadronFlavour','Jet_btagDeepB',
-        'Jet_btagDeepFlavB','Electron_cutBased','Electron_pt','Electron_eta','Muon_looseId','Muon_pfIsoId','Muon_pt','Muon_eta', "Flag.*"
+        'Jet_btagDeepFlavB','Electron_cutBased','Electron_pt','Electron_eta','Muon_looseId','Muon_pfIsoId','Muon_pt','Muon_eta', "Flag.*", "PSWeight"
     ]
 
     if not ana.isData:
