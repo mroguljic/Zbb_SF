@@ -3,7 +3,7 @@ ZBB_DIR             = "/users/mrogul/Work/Zbb_SF_py3/Zbb_SF/"
 #Where to store selection trees
 SELECTION_DIR       = ZBB_DIR+"/results/selection/"
 #Where to store skimmed NanoAODs
-SKIM_DIR            = "/STORE/matej/Zbb_skims/v9_py3/"
+SKIM_DIR            = "/STORE/matej/Zbb_skims/v9_py3_PSweight/"
 #Where to store condor logs for selection jobs
 SELECTION_JOB_DIR   = ZBB_DIR+"/condor/selection_jobs"
 #Where to store condor logs for skimming jobs
