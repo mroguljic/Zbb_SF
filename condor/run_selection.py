@@ -4,7 +4,7 @@ import os, sys, re
 from templates import *
 from run_skim import createDirIfNotExist
 import ROOT as r
-from paths import SELECTION_DIR, SELECTION_JOB_DIR
+from paths import SELECTION_DIR, SELECTION_JOB_DIR, SKIM_DIR
 
 def split_jobs(files, njobs):
     for i in range(0, len(files), njobs):
@@ -82,7 +82,8 @@ def create_jobs(config,year="2016",jobs_dir="",out_dir="",nFiles=1,checkInput=Fa
         open(os.path.join(sampleJobs_dir, 'input', 'condor_{}.condor'.format(sample)), 'w').write(condor_script)
 
         #Split input files
-        skimDirectory   = sample_cfg["dataset"]
+        #skimDirectory   = sample_cfg["dataset"]
+        skimDirectory   = os.path.join(SKIM_DIR, year,sample)
         skimFiles       = [os.path.join(skimDirectory, f) for f in os.listdir(skimDirectory) if os.path.isfile(os.path.join(skimDirectory, f))]
         job_list        = split_jobs(skimFiles, nPerJob)
 
