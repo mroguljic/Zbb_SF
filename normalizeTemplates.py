@@ -98,4 +98,5 @@ def lumiNormalization(wp=0.98):
 if __name__ == '__main__':
 
     #lumiNormalization(wp="tight")    
-    lumiNormalization(wp="medium")
+    lumiNormalization(wp="medium")    
+    lumiNormalization(wp="loose")
