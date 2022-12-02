@@ -1,60 +1,60 @@
 {
   "ZJets_b": {
-    "file": "results/templates/loose/2018/scaled/ZJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/ZJets16APV.root",
     "color":"blue",
     "label": "Z+Jets bb",
     "order": 6
   },
   "ZJets_c": {
-    "file": "results/templates/loose/2018/scaled/ZJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/ZJets16APV.root",
     "color":"slateblue",
     "label": "Z+Jets cc",
     "order": 6
   },
   "ZJets_light": {
-    "file": "results/templates/loose/2018/scaled/ZJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/ZJets16APV.root",
     "color":"deepskyblue",
     "label": "Z+Jets light",
     "order": 6
   },
   "ZJets_unm": {
-    "file": "results/templates/loose/2018/scaled/ZJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/ZJets16APV.root",
     "color":"lavender",
     "label": "Z+Jets unm",
     "order": 6
   },
   "WJets_c": {
-    "file": "results/templates/loose/2018/scaled/WJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/WJets16APV.root",
     "color":"tomato",
     "label": "W+Jets cs",
     "order": 5
   },
   "WJets_light": {
-    "file": "results/templates/loose/2018/scaled/WJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/WJets16APV.root",
     "color":"salmon",
     "label": "W+Jets light",
     "order": 5
   },
   "WJets_unm": {
-    "file": "results/templates/loose/2018/scaled/WJets18.root",
+    "file": "results/templates/medium/2016APV/scaled/WJets16APV.root",
     "color":"mistyrose",
     "label": "W+Jets unm",
     "order": 5
   },
   "TTbar": {
-    "file": "results/templates/loose/2018/scaled/TTbar18.root",
+    "file": "results/templates/medium/2016APV/scaled/TTbar16APV.root",
     "color":"magenta",
     "label": "ttbar",
     "order": 1
   },
   "QCD": {
-    "file": "results/templates/loose/2018/scaled/QCD18.root",
+    "file": "results/templates/medium/2016APV/scaled/QCD16APV.root",
     "color":"gold",
     "label": "Multijets",
     "order": 3
   },
   "data_obs": {
-    "file": "results/templates/loose/2018/scaled/JetHT18.root",
+    "file": "results/templates/medium/2016APV/scaled/JetHT16APV.root",
     "color":"k",
     "label": "Data",
     "order": 8

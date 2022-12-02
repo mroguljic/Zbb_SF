@@ -79,7 +79,7 @@ def plotQCDCorr(corr,d1KUp,d2KUp,d1KDn,d2KDn,outputFile):
     plt.legend(loc="best")
     ax.set_yscale("linear")
     ax.set_xlim([200,2000])
-    ax.set_ylim([0,None])
+    ax.set_ylim([0.5,None])
     ax.set_ylabel("Correction value",horizontalalignment='right', y=1.0)
     ax.set_xlabel("Generator V pT [GeV]",horizontalalignment='right', x=1.0)
 
@@ -111,7 +111,7 @@ def plotEWKCorr(corr,d1KUp,d2KUp,d3KUp,d1KDn,d2KDn,d3KDn,outputFile):
     plt.legend(loc="best")
     ax.set_yscale("linear")
     ax.set_xlim([200,2000])
-    ax.set_ylim([0,None])
+    ax.set_ylim([0.5,None])
     ax.set_ylabel("Correction value",horizontalalignment='right', y=1.0)
     ax.set_xlabel("Generator V pT [GeV]",horizontalalignment='right', x=1.0)
 

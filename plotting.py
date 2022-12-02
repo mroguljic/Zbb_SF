@@ -195,9 +195,11 @@ def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=Tr
             if(sample_cfg["label"]=="ttbar"):
                 labels[-1]=r"t$\bar{t}$"#json restrictions workaround
 
-
     plt.style.use([hep.style.CMS])
-    f, ax       = plt.subplots()
+    f, axs = plt.subplots(2,1, sharex=True, sharey=False,gridspec_kw={'height_ratios': [4, 1],'hspace': 0.05})
+    axs = axs.flatten()
+    plt.sca(axs[0])
+
     centresData = (edgesData[0][:-1] + edgesData[0][1:])/2.
     errorsData  = np.sqrt(histosData[0])
     xerrorsData = []
@@ -222,38 +224,46 @@ def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=Tr
         print("QCD scale {0}".format(scale))
         histos[QCDposition] = histos[QCDposition]*scale
     #--------------------------#
-
-    hep.histplot(histos,edges[0],stack=True,ax=ax,label=labels,linewidth=1,histtype="fill",facecolor=colors,edgecolor='black')
+    hep.histplot(histos,edges[0],stack=True,ax=axs[0],label=labels,linewidth=1,histtype="fill",facecolor=colors,edgecolor='black')
     if mergeMassBins:
         plt.errorbar(centresData,histosData[0], yerr=errorsData, xerr=xerrorsData, fmt='o',color="k",label = labelsData[0])    
     else:
         plt.errorbar(centresData,histosData[0], yerr=errorsData, fmt='o',color="k",label = labelsData[0])    
     if(log):
-        ax.set_yscale("log")
-    ax.legend()
-    ax.set_ylabel(yTitle)
-    ax.set_xlabel(xTitle)
-    plt.xlabel(xTitle, horizontalalignment='right', x=1.0)
+        axs[0].set_yscale("log")
+    axs[0].legend()
+    axs[0].set_ylabel(yTitle)
+    axs[1].set_xlabel(xTitle)
+    axs[1].set_ylabel("Data/MC")
+    #plt.xlabel(xTitle, horizontalalignment='right', x=1.0)
     plt.ylabel(yTitle,horizontalalignment='right', y=1.0)
     
     if(yRange):
         if(yRange[1]==None):
             yRange[1] = dataMax*1.5
-        ax.set_ylim(yRange)
+        axs[0].set_ylim(yRange)
     else:
-        ax.set_ylim([0,dataMax*1.5])
+        axs[0].set_ylim([0,dataMax*1.5])
     if(xRange):
-        ax.set_xlim(xRange)
+        axs[0].set_xlim(xRange)
     lumiText = luminosity + " $fb^{-1}\ (13 TeV)$"
-    hep.cms.lumitext(text=lumiText, ax=ax, fontname=None, fontsize=None)
+    hep.cms.lumitext(text=lumiText, ax=axs[0], fontname=None, fontsize=None)
     hep.cms.text("WiP",loc=0)
     plt.legend(loc=1,ncol=3,handletextpad=0.3)#loc = 'best'
+    
+
+
+    totalMC     = [sum(x) for x in zip(*histos)]
+    dataMCRatio = [a/b for a,b in zip(histosData[0],totalMC)]
+    plt.sca(axs[1])#switch to lower pad
+    axs[1].set_ylim([0,2])
+    hep.histplot(dataMCRatio,edges[0],ax=axs[1],linewidth=1,histtype="step",edgecolor='red')
+    axs[1].axhline(y=1.0, color="grey",linestyle="--")
+
     plt.tight_layout()
-
     print("Saving {0}".format(outFile))
-
     plt.savefig(outFile)
-
+    plt.savefig(outFile.replace(".png",".pdf"))
     plt.cla()
     plt.clf()
 
@@ -701,38 +711,6 @@ def plotVJetsInFit(postfitShapesFile,region,odir):
 
             plotLines(projections,labels,colors,"M_{PNet} [GeV]",linestyles,"{0}/VJets_{1}_{2}.png".format(odir,region,i),xRange=[50,150],yRange=yRanges[i-1],projectionText=projectionText)
 
-def SFcompTight():
-    #SF comp 2016
-    gsp = [[450,550,700,900],#pt bin centers
-    [1.19,1.09,1.14,1.12],#sf val
-    [50,50,100,100],#pt bin width
-    [0.15,0.11,0.12,0.09]]#sf err
-    z = [[725],[0.90],[275],[[0.12],[0.15]]] #[ptbin center, SF val, ptbin width, [- err, + err]]
-    lumiText = "2016 (13 TeV)"
-    outFile  =  "SF_2016.pdf"
-    compSF(gsp,z,outFile,lumiText)
-
-
-    #SF comp 2017
-    gsp = [[450,550,800],#pt bin centers
-    [1.09,1.08,1.05],#sf val
-    [50,50,200],#pt bin width
-    [0.051,0.072,0.052]]#sf err
-    z = [[725],[1.04],[275],[[0.15],[0.17]]]
-    lumiText = "2017 (13 TeV)"
-    outFile  =  "SF_2017.pdf"
-    compSF(gsp,z,outFile,lumiText)
-
-
-    # #SF comp 2018
-    gsp = [[450,550,800],#pt bin centers
-    [1.00,1.03,1.04],#sf val
-    [50,50,200],#pt bin width
-    [0.046,0.036,0.050]]#sf err
-    z = [[725],[0.94],[275],[[0.16],[0.19]]]
-    lumiText = "2018 (13 TeV)"
-    outFile  =  "SF_2018.pdf"
-    compSF(gsp,z,outFile,lumiText)
 
 def SFcompPtSplit(yr,region,polyOrderPt,polyOrderIncl):
     pt_binning  = [450,500,600,1000]
@@ -854,15 +832,17 @@ def printMCYields(data,region,year):
         hist    = f.Get("{0}_m_pT_{1}__nominal".format(sample,region))
         print("{0:10}\t{1:.0f}".format(sample,hist.Integral()))
 
-def getSF(workingArea,polyOrder,cmsswArea,branch="SF_ZJets_bc"):
+def getSF(workingArea,polyOrder,cmsswArea,branch="SF_ZJets_bc",idx=0):
+    #branch is the name of the SF as saved in the multidimfit
+    #idx is the event at which the best-fit value of that SF is saved (before sf -/+ unc.)
     fitDir  = "{0}/{1}/{2}_area".format(cmsswArea,workingArea,polyOrder)
     fitFile = r.TFile.Open("{0}/higgsCombineTest.MultiDimFit.mH120.root".format(fitDir))
     ttree   = fitFile.Get("limit")
-    ttree.GetEvent(0)
+    ttree.GetEvent(idx)
     sf      = getattr(ttree,branch)
-    ttree.GetEvent(1)
+    ttree.GetEvent(idx+1)
     errDn   = sf-getattr(ttree,branch)
-    ttree.GetEvent(2)
+    ttree.GetEvent(idx+2)
     errUp   = getattr(ttree,branch)-sf
     return sf,errDn,errUp
 
@@ -913,11 +893,76 @@ def plotSFs(workingAreas,bestOrders,cmsswArea):
     plt.clf()
     plt.cla()
 
+def plotSFsSplit(bestOrders,cmsswArea,outfile="test.png"):
+    nPtBins     = 3
+    ptBinIdx    = [1,2,3]
+    plt.style.use([hep.style.CMS])
+    f, ax = plt.subplots()
+    plt.sca(ax)
+
+    fmts    = ["go","r+","bs"]
+    labels  = ["Loose Wp","Medium Wp","Tight Wp"] 
+
+    for wpIdx,item in enumerate(sorted(bestOrders.items())):
+        workingArea = item[0]
+        polyOrder   = item[1]
+        #polyOrder   = bestOrders[workingArea]
+        sfs         = []
+        errsDn      = []
+        errsUp      = []
+        for i in range(nPtBins):
+            sf,errDn,errUp  = getSF(workingArea,polyOrder,cmsswArea,branch="SF_ZJets_bc_{0}".format(i),idx=2*i)
+            sfs.append(sf)
+            errsDn.append(errDn)
+            errsUp.append(errUp)
+        ptCoord = [idx+wpIdx*0.05 for idx in ptBinIdx]#slight offset each wp
+
+        plt.errorbar(ptCoord, sfs,yerr=[errsDn,errsUp],label=labels[wpIdx],fmt=fmts[wpIdx])
+
+
+    plt.ylabel("Scale factor",horizontalalignment='right', y=1.0)
+    plt.xlabel("$p_T$ [GeV]",horizontalalignment='right', x=1.0)
+    plt.xticks(ptBinIdx, ['[450,500)', '[500,600)', '[600+]'])
+
+    ax.set_xlim(0,4)
+    ax.set_ylim(0.,2.0)
+    ax.xaxis.set_tick_params(which='minor', top=False,bottom=False)    
+    plt.axhline(y=1.0, color='gray', linestyle='--')
+    plt.legend(ncol=2)
+
+    hep.cms.lumitext("(13 TeV)")
+    hep.cms.text("Work in progress",loc=0)
+
+    print("Saving {0}".format(outFile))
+    plt.savefig(outFile,bbox_inches="tight")
+    plt.savefig(outFile.replace(".png",".pdf"),bbox_inches="tight")
+
+    plt.clf()
+    plt.cla()
+
+def writeSFTable(bestOrders,cmsswArea):
+    nPtBins = 3
+    wps     = ["tight","medium","loose"]
+    years   = ["16APV","16","17","18"]
+    for year in years:
+        print("\\multicolumn{{4}}{{c}}{{{0}{1}}}\\\\ \\hline".format("20",year))
+        for wp in wps:
+            line = "{0}".format(wp.capitalize())
+            workingArea = "{0}_{1}_split".format(year,wp)
+            polyOrder   = bestOrders[workingArea]
+            for ptBin in range(1,nPtBins+1):
+                sf,errDn,errUp  = getSF(workingArea,polyOrder,cmsswArea,branch="SF_ZJets_bc_{0}".format(ptBin-1),idx=2*(ptBin-1))
+                line+=" & ${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(sf,errUp,errDn)
+            line+="\\\\"
+            print(line)
+        print("\\hline")
+
+
 if __name__ == '__main__':
 
 
     # for year in ["2016","2016APV","2017","2018"]:
-    #     odir = "results/plots/tight/{0}/".format(year)
+    #     odir = "results/plots/loose/{0}/".format(year)
     #     Path(odir).mkdir(parents=True, exist_ok=True)
         
     #     if(year=="2016APV"):
@@ -929,7 +974,7 @@ if __name__ == '__main__':
     #     elif(year=="2018"):
     #         luminosity="59.8"
 
-    #     with open("plotConfigs/hadronic{0}.json".format(year)) as json_file:
+    #     with open("plotConfigs/hadronic{0}_L.json".format(year)) as json_file:
     #         data = json.load(json_file)
 
     #         printMCYields(data,"pass",year)
@@ -979,8 +1024,8 @@ if __name__ == '__main__':
 
     # #Postfit T
     # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_tight":"2","16_tight":"3","17_tight":"2","18_tight":"2"}
-    # workingAreas    = ["16APV_tight","16_tight","17_tight","18_tight"]
+    # bestOrders      = {"16APV_tight_split":"2","16_tight_split":"2","17_tight_split":"2","18_tight_split":"2"}
+    # workingAreas    = ["16APV_tight_split","16_tight_split","17_tight_split","18_tight_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
@@ -998,8 +1043,8 @@ if __name__ == '__main__':
 
     # #Postfit M
     # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_medium":"2","16_medium":"2","17_medium":"2","18_medium":"2"}
-    # workingAreas    = ["16APV_medium","16_medium","17_medium","18_medium"]
+    # bestOrders      = {"16APV_medium_split":"2","16_medium_split":"2","17_medium_split":"3","18_medium_split":"2"}
+    # workingAreas    = ["16APV_medium_split","16_medium_split","17_medium_split","18_medium_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
@@ -1016,8 +1061,8 @@ if __name__ == '__main__':
 
     # #Postfit L
     # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_loose":"2","16_loose":"2","17_loose":"4","18_loose":"4"}
-    # workingAreas    = ["16APV_loose","16_loose","17_loose","18_loose"]
+    # bestOrders      = {"16APV_loose_split":"2","16_loose_split":"2","17_loose_split":"4","18_loose_split":"4"}
+    # workingAreas    = ["16APV_loose_split","16_loose_split","17_loose_split","18_loose_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
@@ -1032,12 +1077,34 @@ if __name__ == '__main__':
     #     except:
     #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
 
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    # bestOrders      = {"16APV_loose_split":"2","16APV_medium_split":"2","16APV_tight_split":"2"}
+    # outFile         = "results/plots/SF_16APV.png"
+    # plotSFsSplit(bestOrders,cmsswArea,outFile)
+
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    # bestOrders      = {"16_loose_split":"2","16_medium_split":"2","16_tight_split":"2"}
+    # outFile         = "results/plots/SF_16.png"
+    # plotSFsSplit(bestOrders,cmsswArea,outFile)
+
+    # bestOrders      = {"17_loose_split":"4","17_medium_split":"3","17_tight_split":"2"}
+    # outFile         = "results/plots/SF_17.png"
+    # plotSFsSplit(bestOrders,cmsswArea,outfile=outFile)
+
+    # bestOrders      = {"18_loose_split":"4","18_medium_split":"2","18_tight_split":"2"}
+    # outFile         = "results/plots/SF_18.png"
+    # plotSFsSplit(bestOrders,cmsswArea,outFile)
+
+
     cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    bestOrders      = {"16APV_loose":"2","16_loose":"2","17_loose":"4","18_loose":"4","16APV_tight":"2","16_tight":"3","17_tight":"2","18_tight":"2","16APV_medium":"2","16_medium":"2","17_medium":"2","18_medium":"2"}
-    workingAreas    = ["16APV_loose","16_loose","17_loose","18_loose","16APV_medium","16_medium","17_medium","18_medium","16APV_tight","16_tight","17_tight","18_tight"]    
-    plotSFs(workingAreas,bestOrders,cmsswArea)
-
-
+    bestOrders      = {
+    "16APV_loose_split":"2","16APV_medium_split":"2","16APV_tight_split":"2",
+    "16_loose_split":"2","16_medium_split":"2","16_tight_split":"2",
+    "17_loose_split":"4","17_medium_split":"3","17_tight_split":"2",
+    "18_loose_split":"4","18_medium_split":"2","18_tight_split":"2"
+    }
+    writeSFTable(bestOrders,cmsswArea)
+    
     # #plotVJetsInFit(fitFile,"T","results/plots/{0}/r_fit/")
     # #plotVJetsInFit(fitFile,"F","results/plots/{0}/r_fit/")
 
