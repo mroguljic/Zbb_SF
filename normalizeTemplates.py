@@ -56,14 +56,14 @@ def mergeSamples(inFiles,outFile,regexMatch,regexReplace):
     f.Close()
     print("\n")
 
-def lumiNormalization(wp=0.98):
+def lumiNormalization(wp="tight",tagger="ParticleNet"):
 
     processes = ["QCD700","QCD1000","QCD1500","QCD2000","TTbarHadronic","TTbarSemileptonic","TTbarMtt700","TTbarMtt1000",
     "WJets400","WJets600","WJets800","ZJets400","ZJets600","ZJets800"]
     for year in ['2016','2016APV','2017','2018']:
         print(year)
-        nonScaledDir = "results/templates/{0}/{1}/nonScaled/".format(wp,year)
-        lumiScaledDir = "results/templates/{0}/{1}/scaled/".format(wp,year)
+        nonScaledDir = "results/templates/{2}/{0}/{1}/nonScaled/".format(wp,year,tagger)
+        lumiScaledDir = "results/templates/{2}/{0}/{1}/scaled/".format(wp,year,tagger)
 
         for proc in processes:
             nonScaledFile = "{0}/{1}.root".format(nonScaledDir,proc)
@@ -98,5 +98,10 @@ def lumiNormalization(wp=0.98):
 if __name__ == '__main__':
 
     #lumiNormalization(wp="tight")    
-    lumiNormalization(wp="medium")    
-    lumiNormalization(wp="loose")
+    #lumiNormalization(wp="medium")    
+    #lumiNormalization(wp="loose")
+
+    # lumiNormalization(wp="tight",tagger="DeepDoubleX")
+    # lumiNormalization(wp="tight",tagger="DeepAK8")
+    # lumiNormalization(wp="tight",tagger="Hbb")    
+    lumiNormalization(wp="tight",tagger="/")

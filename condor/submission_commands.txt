@@ -13,6 +13,7 @@ python run_selection.py -y 2016
 python run_selection.py -y 2017
 python run_selection.py -y 2018
 
-python run_templates.py 0.98
-python run_templates.py 0.94
+python run_templates.py ceiling tight
+python run_templates.py ceiling medium
+python run_templates.py ceiling loose
 

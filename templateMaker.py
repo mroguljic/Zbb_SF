@@ -15,6 +15,17 @@ def getNweighted(analyzer,isData):
         nWeighted = analyzer.DataFrame.Count().GetValue()
     return nWeighted
 
+def getPnetDist(analyzer,process,taggerBranch):
+    beforeNode = analyzer.GetActiveNode()
+    analyzer.SetActiveNode(beforeNode)
+    #Insert mass cut!
+    if("ZJets" in process):
+        analyzer.Cut("bc_cut_forROC","jetCat==3 || jetCat==2")
+        analyzer.Cut("mass_forRoc","JetPnetMass>50 && JetPnetMass<150")
+    hTagger = a.DataFrame.Histo1D(('{0}_{1}_score'.format(options.process,taggerBranch),';{0} score'.format(taggerBranch),1000,0.,1.),taggerBranch,"weight__nominal")
+    analyzer.SetActiveNode(beforeNode)
+    return hTagger
+
 def separateVHistos(analyzer,process,region,nomTreeFlag,massVar):
     cats = {
     "light" : "jetCat==1",
@@ -107,8 +118,12 @@ else:
 
 a = analyzer(iFile)
 print(options.wps)
-pnetWpUp   = options.wps[0]
-pnetWpLo   = options.wps[1]
+taggerWpUp   = options.wps[0]
+taggerWpLo   = options.wps[1]
+taggerBranch = "pnet0"
+#taggerBranch = "deepTag0"
+#taggerBranch = "ddb0"
+#taggerBranch = "hbb0"
 year    = options.year
 histos=[]
 histGroups=[]
@@ -187,7 +202,12 @@ if not isData:
 
 a.MakeWeightCols()
 
-regionDefs = [("pass","pnet0<{0} && pnet0>{1}".format(pnetWpUp, pnetWpLo)),("fail","pnet0<{0}".format(pnetWpLo))]
+#Hist for ROC curve, need both pass and fail
+hTagger = getPnetDist(a,options.process,taggerBranch)
+histos.append(hTagger)
+
+
+regionDefs = [("pass","{2}<{0} && {2}>{1}".format(taggerWpUp, taggerWpLo, taggerBranch)),("fail","{1}<{0}".format(taggerWpLo,taggerBranch))]
 regionYields = {}
 
 for region,cut in regionDefs:
@@ -220,7 +240,7 @@ for region,cut in regionDefs:
     regionYields[region] = getNweighted(a,isData)
 
 #include histos from evt sel in the template file for nominal template
-regionDefs = [("pass","pnet0<{0} && pnet0>{1}".format(pnetWpUp, pnetWpLo)),("fail","pnet0<{0}".format(pnetWpLo))]
+regionDefs = [("pass","{2}<{0} && {2}>{1}".format(taggerWpUp, taggerWpLo,taggerBranch)),("fail","{1}<{0}".format(taggerWpLo,taggerBranch))]
 
 
 

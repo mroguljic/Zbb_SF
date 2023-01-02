@@ -228,6 +228,9 @@ def eventSelection(options):
     nTopVeto = getNweighted(a,isData)
 
     a.Define("pnet0","FatJet_particleNetMD_Xbb[0]/(FatJet_particleNetMD_Xbb[0]+FatJet_particleNetMD_QCD[0])")
+    a.Define("deepTag0","FatJet_deepTagMD_ZHbbvsQCD[0]")
+    a.Define("ddb0","FatJet_btagDDBvLV2[0]")
+    a.Define("hbb0","FatJet_btagHbb[0]")
     #------------------------------#
 
 
@@ -277,7 +280,7 @@ def eventSelection(options):
 
     #--------Store Output----------#
 
-    snapshotColumns = ["pnet0","FatJet_pt0","JetPnetMass","JetSDMass","PV_npvsGood","nFatJet"]
+    snapshotColumns = ["pnet0","deepTag0","ddb0","hbb0","FatJet_pt0","JetPnetMass","JetSDMass","PV_npvsGood","nFatJet"]
     outputFile      = options.output.replace(".root","_{0}.root".format(options.variation))
 
     if not isData:

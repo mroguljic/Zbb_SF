@@ -162,7 +162,7 @@ def mergeLoMassBins(hist,edges):
     return newHist, [newEdges]
 
 
-def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="36.3",proj="X",mergeMassBins=False):
+def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=True,rebinX=1,luminosity="36.3",proj="X",mergeMassBins=False,tagger="ParticleNet"):
     histos  = []
     labels  = []
     edges   = []
@@ -172,7 +172,8 @@ def plotVarStack(data,var,outFile,xTitle="",yTitle="",yRange=[],xRange=[],log=Tr
     labelsData = []
     data = sorted(data.items(), key=lambda x: x[1]["order"])#VERY HANDY, reads samples in order
     for sample, sample_cfg in data:
-        tempFile = r.TFile.Open(sample_cfg["file"])
+        tempFile = r.TFile.Open(sample_cfg["file"].replace("templates/","templates/{0}/".format(tagger)))
+        #print("Opening ", sample_cfg["file"].replace("templates/","templates/{0}/".format(tagger)))
         if(proj=="X"):
             h = tempFile.Get("{0}_{1}".format(sample,var)).ProjectionX()
         else:
@@ -942,7 +943,9 @@ def plotSFsSplit(bestOrders,cmsswArea,outfile="test.png"):
 
 def writeSFTable(bestOrders,cmsswArea):
     nPtBins = 3
-    wps     = ["tight","medium","loose"]
+    #wps     = ["tight","medium","loose"]
+    #wps     = ["tight","medium"]
+    wps     = ["tight"]
     years   = ["16APV","16","17","18"]
     for year in years:
         print("\\multicolumn{{4}}{{c}}{{{0}{1}}}\\\\ \\hline".format("20",year))
@@ -962,7 +965,8 @@ if __name__ == '__main__':
 
 
     # for year in ["2016","2016APV","2017","2018"]:
-    #     odir = "results/plots/loose/{0}/".format(year)
+    #     tagger = "DeepAK8"
+    #     odir = "results/plots/{1}/medium/{0}/".format(year,tagger)
     #     Path(odir).mkdir(parents=True, exist_ok=True)
         
     #     if(year=="2016APV"):
@@ -974,20 +978,20 @@ if __name__ == '__main__':
     #     elif(year=="2018"):
     #         luminosity="59.8"
 
-    #     with open("plotConfigs/hadronic{0}_L.json".format(year)) as json_file:
+    #     with open("plotConfigs/hadronic{0}_M.json".format(year)) as json_file:
     #         data = json.load(json_file)
 
     #         printMCYields(data,"pass",year)
     #         printMCYields(data,"fail",year)
 
-    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_lin_pass_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,None],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_lin_pass_data.pdf".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,None],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_lin_fail_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,10**6],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_pass_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[1,10**6],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_fail_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[100,10**8],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_fail_data.pdf".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[100,10**8],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True)
-    #         plotVarStack(data,"m_pT_pass__nominal","{0}/pT_pass_data.png".format(odir),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[1,10**7],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
-    #         plotVarStack(data,"m_pT_fail__nominal","{0}/pT_fail_data.png".format(odir),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[100,10**9],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y")
+    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_lin_pass_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,None],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_lin_pass_data.pdf".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,None],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_lin_fail_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[0,10**6],log=False,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_pass__nominal","{0}/m_pass_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[1,10**6],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_fail_data.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[100,10**8],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_fail__nominal","{0}/m_fail_data.pdf".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / GeV",yRange=[100,10**8],log=True,xRange=[40,200],rebinX=1,luminosity=luminosity,mergeMassBins=True,tagger=tagger)
+    #         plotVarStack(data,"m_pT_pass__nominal","{0}/pT_pass_data.png".format(odir),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[1,10**7],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y",tagger=tagger)
+    #         plotVarStack(data,"m_pT_fail__nominal","{0}/pT_fail_data.png".format(odir),xTitle="$p_{T}$ [GeV]",yTitle="Events / 50 GeV",yRange=[100,10**9],log=True,xRange=[450,2000],rebinX=1,luminosity=luminosity,proj="Y",tagger=tagger)
 
 
             # f = r.TFile.Open(data["data_obs"]["file"])#"JetHT16.root")
@@ -1023,59 +1027,66 @@ if __name__ == '__main__':
         #     plotVJets(data,"m_pT_pass__nominal","{0}/mVJets_pass_lin.png".format(odir),xTitle="$M_{PNet}$ [GeV]",yTitle="Events / 5 GeV",log=False,xRange=[40,150],yRange=[0,1200],rebinX=1,luminosity=luminosity,proj="X")
 
     # #Postfit T
-    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_tight_split":"2","16_tight_split":"2","17_tight_split":"2","18_tight_split":"2"}
+    # tagger          = "Hbb"
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/{0}/".format(tagger)
+    # #bestOrders      = {"16APV_tight_split":"2","16_tight_split":"2","17_tight_split":"2","18_tight_split":"2"} #PNet
+    # #bestOrders      = {"16APV_tight_split":"2","16_tight_split":"2","17_tight_split":"2","18_tight_split":"4"} #DeepDoubleX
+    # bestOrders      = {"16APV_tight_split":"3","16_tight_split":"3","17_tight_split":"3","18_tight_split":"3"} #Hbb
     # workingAreas    = ["16APV_tight_split","16_tight_split","17_tight_split","18_tight_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
     #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
+    #     Path("results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger)).mkdir(parents=True, exist_ok=True)
 
     #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
+    #         plotPostfit(fitFile,"pass","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotPostfit(fitFile,"fail","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotRPF(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder)
+    #         plotRPFSurf(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder,zmax=5.)
     #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+    #         print("Couldn't plot for {0} {1} {2}".format(workingArea,polyOrder,tagger))
 
 
     # #Postfit M
-    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_medium_split":"2","16_medium_split":"2","17_medium_split":"3","18_medium_split":"2"}
+    # tagger          = "DeepDoubleX"
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/{0}/".format(tagger)
+    # #bestOrders      = {"16APV_medium_split":"2","16_medium_split":"2","17_medium_split":"3","18_medium_split":"2"} #PNet
+    # bestOrders      = {"16APV_medium_split":"2","16_medium_split":"3","17_medium_split":"3","18_medium_split":"4"} #DeepDoubleX
     # workingAreas    = ["16APV_medium_split","16_medium_split","17_medium_split","18_medium_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
     #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
-
+    #     Path("results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger)).mkdir(parents=True, exist_ok=True)
     #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
+    #         plotPostfit(fitFile,"pass","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotPostfit(fitFile,"fail","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotRPF(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder)
+    #         plotRPFSurf(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder,zmax=5.)
     #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+    #         print("Couldn't plot for {0} {1} {2}".format(workingArea,polyOrder,tagger))
+
 
     # #Postfit L
-    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
-    # bestOrders      = {"16APV_loose_split":"2","16_loose_split":"2","17_loose_split":"4","18_loose_split":"4"}
-    # workingAreas    = ["16APV_loose_split","16_loose_split","17_loose_split","18_loose_split"]
+    # tagger          = "DeepDoubleX"
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/{0}/".format(tagger)
+    # #bestOrders      = {"16APV_loose_split":"2","16_loose_split":"2","17_loose_split":"4","18_loose_split":"4"} #PNet
+    # bestOrders      = {"16APV_loose_split":"4"}
+    # #workingAreas    = ["16APV_loose_split","16_loose_split","17_loose_split","18_loose_split"]
+    # workingAreas    = ["16APV_loose_split"]
     # for workingArea in workingAreas:
     #     polyOrder       = bestOrders[workingArea]
     #     baseDir         = cmsswArea + workingArea + "/" + polyOrder + "_area/"
     #     fitFile         = baseDir+"postfitshapes_s.root"
-    #     Path("results/plots/{0}/{1}/".format(workingArea,polyOrder)).mkdir(parents=True, exist_ok=True)
-
+    #     Path("results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger)).mkdir(parents=True, exist_ok=True)
     #     try:
-    #         plotPostfit(fitFile,"pass","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotPostfit(fitFile,"fail","results/plots/{0}/{1}/".format(workingArea,polyOrder))
-    #         plotRPF(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder)
-    #         plotRPFSurf(fitFile,"results/plots/{0}/{1}/".format(workingArea,polyOrder),polyOrder,zmax=5.)
+    #         plotPostfit(fitFile,"pass","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotPostfit(fitFile,"fail","results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger))
+    #         plotRPF(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder)
+    #         plotRPFSurf(fitFile,"results/plots/{2}/{0}/{1}/".format(workingArea,polyOrder,tagger),polyOrder,zmax=5.)
     #     except:
-    #         print("Couldn't plot for {0} {1}".format(workingArea,polyOrder))
+    #         print("Couldn't plot for {0} {1} {2}".format(workingArea,polyOrder,tagger))
 
     # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
     # bestOrders      = {"16APV_loose_split":"2","16APV_medium_split":"2","16APV_tight_split":"2"}
@@ -1096,12 +1107,35 @@ if __name__ == '__main__':
     # plotSFsSplit(bestOrders,cmsswArea,outFile)
 
 
-    cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    #PNet
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/"
+    # bestOrders      = {
+    # "16APV_loose_split":"2","16APV_medium_split":"2","16APV_tight_split":"2",
+    # "16_loose_split":"2","16_medium_split":"2","16_tight_split":"2",
+    # "17_loose_split":"4","17_medium_split":"3","17_tight_split":"2",
+    # "18_loose_split":"4","18_medium_split":"2","18_tight_split":"2"
+    # }
+    # writeSFTable(bestOrders,cmsswArea)
+
+
+    # #DDX
+    # cmsswArea       = "StatAna/CMSSW_10_6_14/src/DeepDoubleX/"
+    # bestOrders      = {
+    # "16APV_medium_split":"2","16APV_tight_split":"2",
+    # "16_medium_split":"3","16_tight_split":"2",
+    # "17_medium_split":"3","17_tight_split":"2",
+    # "18_medium_split":"4","18_tight_split":"4"
+    # }
+    # writeSFTable(bestOrders,cmsswArea)
+
+
+    #DDX
+    cmsswArea       = "StatAna/CMSSW_10_6_14/src/Hbb/"
     bestOrders      = {
-    "16APV_loose_split":"2","16APV_medium_split":"2","16APV_tight_split":"2",
-    "16_loose_split":"2","16_medium_split":"2","16_tight_split":"2",
-    "17_loose_split":"4","17_medium_split":"3","17_tight_split":"2",
-    "18_loose_split":"4","18_medium_split":"2","18_tight_split":"2"
+    "16APV_tight_split":"3",
+    "16_tight_split":"3",
+    "17_tight_split":"3",
+    "18_tight_split":"3"
     }
     writeSFTable(bestOrders,cmsswArea)
     
